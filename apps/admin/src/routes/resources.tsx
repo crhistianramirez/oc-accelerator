@@ -3,6 +3,7 @@ import ResourceList from "../components/ResourceList/ResourceList";
 import { ResourceDetailWithParams } from "../components/ResourceDetail/ResourceDetail";
 import AssignmentList from "../components/AssignmentList/AssignmentList";
 import ResourceAssignment from "../components/ResourceAssignment/ResourceAssignment";
+import PromotionWizard from "../components/ResourceList/PromotionWizard/PromotionWizard";
 
 interface IndexResourceRoute extends IndexRouteObject {
   label?: string;
@@ -369,7 +370,7 @@ export const resources: ResourceRoute[] = [
   },
   {
     path: "/promotions",
-    element: <ResourceList resourceName="Promotions" />,
+    element: <ResourceList resourceName="Promotions" createButton={<PromotionWizard />} />,
     label: "Promotions",
   },
   {

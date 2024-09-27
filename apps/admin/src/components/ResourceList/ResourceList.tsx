@@ -35,7 +35,8 @@ interface ResourceListProps {
   filters?: {
     [filterKey: string]: string
   }
-  readOnly?: boolean
+  readOnly?: boolean,
+  createButton?: React.ReactNode
 }
 
 export const cellCallback = (cellValue: unknown, properties: OpenAPIV3.SchemaObject) => {
@@ -47,7 +48,7 @@ export const cellCallback = (cellValue: unknown, properties: OpenAPIV3.SchemaObj
   )
 }
 
-const ResourceList: FC<ResourceListProps> = ({ resourceName, readOnly, hrefResolver }) => {
+const ResourceList: FC<ResourceListProps> = ({ resourceName, readOnly, hrefResolver, createButton }) => {
   const location = useLocation()
   const navigate = useNavigate()
   const [searchParams] = useSearchParams()
@@ -276,6 +277,7 @@ const ResourceList: FC<ResourceListProps> = ({ resourceName, readOnly, hrefResol
                   )}
                   {hasDirectionParam && <DirectionMenu />}
                   {!readOnly && isAdmin && (
+                    createButton ||
                     <Button
                       ml="auto"
                       variant="solid"

@@ -1,3 +1,4 @@
+import { InfoOutlineIcon } from '@chakra-ui/icons'
 import {
   FormControl as ChakraFormControl,
   FormControlProps,
@@ -8,6 +9,8 @@ import {
   FormLabelProps,
   TextProps,
   Text,
+  TooltipProps,
+  Tooltip,
 } from '@chakra-ui/react'
 import { FC, ReactNode } from 'react'
 import { Control, get, useController } from 'react-hook-form'
@@ -57,6 +60,16 @@ export interface BaseReactHookFormProps {
    * Chakra FormErrorMessageProps for error message
    */
   errorMessageProps?: FormErrorMessageProps
+
+  /**
+   * Text for Chakra Tooltip
+   */
+  tooltipText?: string
+
+  /**
+   * Chakra TooltipProps
+   */
+  tooltipProps?: TooltipProps
 }
 
 /**
@@ -75,6 +88,8 @@ export const FormControl: FC<BaseProps> = (props: BaseProps) => {
     helperText,
     helperTextProps,
     errorMessageProps,
+    tooltipText,
+    tooltipProps,
     ...rest
   } = props
 
@@ -108,6 +123,19 @@ export const FormControl: FC<BaseProps> = (props: BaseProps) => {
         </FormLabel>
       ) : (
         label
+      )}
+      {tooltipText && (
+        <Tooltip
+          label={tooltipText}
+          placement="right"
+          aria-label={`Tooltip for form field ${name}`}
+          {...tooltipProps}
+        >
+          <InfoOutlineIcon
+            fontSize=".9em"
+            color="blackAlpha.600"
+          />
+        </Tooltip>
       )}
       {children}
       <FormErrorMessage

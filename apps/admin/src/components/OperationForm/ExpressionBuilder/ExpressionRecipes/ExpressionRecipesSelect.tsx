@@ -33,6 +33,7 @@ interface RecipeVariables {
 }
 
 interface ExpressionRecipesSelectProps {
+  filter?: (recipe: any) => boolean
   onChange: (
     eligibleExpressionQuery: any,
     valueExpressionQuery: any,
@@ -42,7 +43,7 @@ interface ExpressionRecipesSelectProps {
   type: 'Promotion' | 'Approval Rule'
 }
 
-export function ExpressionRecipesSelect({ onChange, type }: ExpressionRecipesSelectProps) {
+export function ExpressionRecipesSelect({ onChange, type, filter }: ExpressionRecipesSelectProps) {
   const { fields } = usePromoExpressions()
   const { isOpen, onOpen, onClose } = useDisclosure()
   const [recipeName, setRecipeName] = useState('')
@@ -50,11 +51,11 @@ export function ExpressionRecipesSelect({ onChange, type }: ExpressionRecipesSel
 
   const recipes: any = useMemo(() => {
     if (type === 'Promotion') {
-      return promoRecipes
+      return filter ? promoRecipes.filter(filter) : promoRecipes
     } else {
-      return approvalRuleRecipes
+      return filter ? approvalRuleRecipes.filter(filter) : approvalRuleRecipes
     }
-  }, [type])
+  }, [type, filter])
 
   const options = groupRecipes()
 
@@ -136,7 +137,7 @@ export function ExpressionRecipesSelect({ onChange, type }: ExpressionRecipesSel
           onChange={handleChange}
           formatGroupLabel={(groupedOption) => groupedOption.label}
           chakraStyles={{
-            container: (baseStyles) => ({ ...baseStyles, maxWidth: '400px' }),
+            container: (baseStyles) => ({ ...baseStyles }),
           }}
         />
       </FormControl>
