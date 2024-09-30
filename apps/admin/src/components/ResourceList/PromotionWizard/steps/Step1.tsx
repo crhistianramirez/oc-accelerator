@@ -1,9 +1,53 @@
 import { FormControl, FormHelperText } from '@chakra-ui/react'
 import { InputControl } from '../../../OperationForm/Controls'
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
+import { useFormContext } from 'react-hook-form'
+import { VStack, Text } from '@chakra-ui/react'
 
-interface Step1Props {}
-const Step1: FC<Step1Props> = () => {
+interface Step1Props {
+  onUpdateDescription: (description: JSX.Element) => void
+}
+
+const Step1: FC<Step1Props> = ({ onUpdateDescription }) => {
+  const { watch } = useFormContext()
+
+  const name = watch('body.Name')
+  const description = watch('body.Description')
+
+  useEffect(() => {
+    onUpdateDescription(
+      <VStack
+        align="start"
+        gap="0"
+      >
+        {name && (
+          <Text>
+            Promotion Name:{' '}
+            <Text
+              ml="1"
+              as="span"
+              fontWeight="bold"
+            >
+              {name}
+            </Text>
+          </Text>
+        )}
+        {description && (
+          <Text>
+            Description:
+            <Text
+              ml="1"
+              as="span"
+              fontWeight="bold"
+            >
+              {description}
+            </Text>
+          </Text>
+        )}
+      </VStack>
+    )
+  }, [name, description, onUpdateDescription])
+
   return (
     <>
       <FormControl mb={5}>
