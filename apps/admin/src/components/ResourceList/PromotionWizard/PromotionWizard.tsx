@@ -22,7 +22,9 @@ import {
   StepStatus,
   StepTitle,
   Text,
+  theme,
   useDisclosure,
+  useMediaQuery,
   useSteps,
   useToast,
   VStack,
@@ -140,6 +142,11 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
     }
   }
 
+  const [belowLg] = useMediaQuery(`(max-width: ${theme.breakpoints['lg']})`, {
+    ssr: true,
+    fallback: false, // return false on the server, and re-evaluate on the client side
+  })
+
   const updateStepDescription = (stepIndex: number, description: any) => {
     setStepDescriptions((prev) => {
       const updated = [...prev]
@@ -209,12 +216,15 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
             <Container
               maxW="container.xl"
               display="grid"
-              gridTemplateColumns="1fr 3fr"
+              gridTemplateColumns={{ lg: '1fr 3fr' }}
               mt="10vh"
             >
               <Stepper
-                h="700px"
-                orientation="vertical"
+                maxW="100%"
+                overflowX="auto"
+                h={{ lg: '75vh' }}
+                alignItems={belowLg ? 'flex-start' : 'center'}
+                orientation={belowLg ? 'horizontal' : 'vertical'}
                 colorScheme="primary"
                 index={activeStep}
                 gap={0}
@@ -222,6 +232,7 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
               >
                 {steps.map((step, index) => (
                   <Box
+                    id="step"
                     as={Step}
                     key={index}
                     onClick={() => setActiveStep(index)}
@@ -235,40 +246,43 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
                       />
                     </StepIndicator>
                     <VStack
-                      ml="3"
                       alignItems="flex-start"
                       cursor="pointer"
                       w="full"
-                      h="75px"
+                      minH="50px"
                       rounded="md"
-                      p="3"
                       mt={-3}
-                      _active={{ bgColor: 'blackAlpha.200' }}
+                      mb="6"
+                      ml="3"
+                      p="3"
+                      bgColor={activeStep === index ? 'blackAlpha.200' : ''}
                       _hover={{ bgColor: 'blackAlpha.200' }}
                     >
+                      <StepTitle>{step}</StepTitle>
                       <Hide below="xl">
-                        <StepTitle>{step}</StepTitle>
+                        <StepDescription>{stepDescriptions[index] || ''}</StepDescription>
                       </Hide>
-                      <StepDescription>{stepDescriptions[index] || '...'}</StepDescription>
                     </VStack>
                     <StepSeparator />
                   </Box>
                 ))}
               </Stepper>
-              <Show below="xl">
-                <Text>
-                  Step {activeStep + 1}: {steps[activeStep]}
-                </Text>
-              </Show>
-              <Flex
-                borderLeft="1px solid"
+              <VStack
+                alignItems="flex-start"
+                borderLeft={!belowLg ? '1px solid' : ''}
                 borderColor="chakra-border-color"
                 pl={16}
                 py={8}
                 w="full"
               >
+                <Show below="xl">
+                  <Text>
+                    Step {activeStep + 1}: {steps[activeStep]}
+                  </Text>
+                </Show>
                 <FormProvider {...methods}>
                   <Box
+                  h="full"
                     as="form"
                     w="full"
                     name="PROMOTION_FORM"
@@ -307,7 +321,7 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
                     </VStack>
                   </Box>
                 </FormProvider>
-              </Flex>
+              </VStack>
             </Container>
           </ModalBody>
         </ModalContent>

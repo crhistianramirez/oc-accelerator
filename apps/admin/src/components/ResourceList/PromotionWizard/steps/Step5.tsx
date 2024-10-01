@@ -16,37 +16,41 @@ const Step5: FC<Step5Props> = ({ onUpdateDescription }) => {
   useEffect(() => {
     const usageDescription = showUsageOptions ? (
       <VStack align="start">
-        <Text>
-          Redemption Limit:{' '}
-          <Text
-            as="span"
-            fontWeight="bold"
-          >
-            {redemptionLimit || 'N/A'}
+        {redemptionLimit && (
+          <Text>
+            Redemption Limit:{' '}
+            <Text
+              as="span"
+              fontWeight="bold"
+            >
+              {redemptionLimit}
+            </Text>
           </Text>
-        </Text>
-        <Text>
-          Redemption Limit Per User:{' '}
-          <Text
-            as="span"
-            fontWeight="bold"
-          >
-            {redemptionLimitPerUser || 'N/A'}
+        )}
+
+        {redemptionLimitPerUser && (
+          <Text>
+            Redemption Limit Per User:{' '}
+            <Text
+              as="span"
+              fontWeight="bold"
+            >
+              {redemptionLimitPerUser}
+            </Text>
           </Text>
-        </Text>
+        )}
+
         <Text>
           Can Combine:{' '}
           <Text
             as="span"
             fontWeight="bold"
           >
-            {canCombine ? 'Yes' : 'No'}
+            {canCombine ? 'true' : 'false'}
           </Text>
         </Text>
       </VStack>
-    ) : (
-      <Text fontStyle="italic">Usage limits not defined.</Text>
-    )
+    ) : <></>
 
     onUpdateDescription(usageDescription)
   }, [showUsageOptions, redemptionLimit, redemptionLimitPerUser, canCombine, onUpdateDescription])
