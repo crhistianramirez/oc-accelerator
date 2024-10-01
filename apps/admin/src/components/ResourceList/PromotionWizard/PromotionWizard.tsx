@@ -1,6 +1,8 @@
 import {
+  Box,
   Button,
   ButtonGroup,
+  Container,
   Flex,
   FormControl,
   FormErrorMessage,
@@ -9,10 +11,10 @@ import {
   ModalBody,
   ModalCloseButton,
   ModalContent,
-  ModalHeader,
   ModalOverlay,
   Show,
   Step,
+  StepDescription,
   StepIndicator,
   StepNumber,
   Stepper,
@@ -25,25 +27,26 @@ import {
   useToast,
   VStack,
 } from '@chakra-ui/react'
+import { useMutateOcResource, useOcForm } from '@rwatt451/ordercloud-react'
+import { get } from 'lodash'
+import { OrderCloudError, Promotion } from 'ordercloud-javascript-sdk'
 import { FC, useEffect, useMemo, useState } from 'react'
 import { FormProvider, SubmitHandler } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
+import { ApiError } from '../../OperationForm'
 import { ExpressionRecipesSelect } from '../../OperationForm/ExpressionBuilder/ExpressionRecipes/ExpressionRecipesSelect'
+import { formatQuery } from '../../OperationForm/ExpressionBuilder/PromotionExpressionBuilder/formatQuery'
 import Step1 from './steps/Step1'
 import Step2 from './steps/Step2'
-import Step4 from './steps/Step4'
 import Step3 from './steps/Step3'
+import Step4 from './steps/Step4'
 import Step5 from './steps/Step5'
-import { formatQuery } from '../../OperationForm/ExpressionBuilder/PromotionExpressionBuilder/formatQuery'
-import { useMutateOcResource, useOcForm } from '@rwatt451/ordercloud-react'
-import { OrderCloudError, Promotion } from 'ordercloud-javascript-sdk'
-import { ApiError } from '../../OperationForm'
-import { get } from 'lodash'
-import { useNavigate } from 'react-router-dom'
+
 interface PromotionWizardProps {}
 
 const PromotionWizard: FC<PromotionWizardProps> = () => {
   const { isOpen, onOpen, onClose } = useDisclosure()
-  const [showUsageOptions, setShowUsageOptions] = useState(false)
+  const [stepDescriptions, setStepDescriptions] = useState<string[]>([])
   const toast = useToast()
   const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false)
@@ -63,7 +66,6 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
         ValueExpression: '',
       },
       parameters: {
-        // This is required by the form even though we're not using it
         promotionID: 'someval',
       },
     }
@@ -79,10 +81,7 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
 
   const isMissingRecipe = useMemo(() => {
     const errors = methods.formState.errors.body
-    if (get(errors, 'EligibleExpression') || get(errors, 'ValueExpression')) {
-      return true
-    }
-    return false
+    return !!get(errors, 'EligibleExpression') || !!get(errors, 'ValueExpression')
   }, [methods.formState])
 
   useEffect(() => {
@@ -122,53 +121,8 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
     count: steps.length,
   })
 
-  const isLineItemLevel = methods.watch('body.LineItemLevel') || false
-
-  const handleRecipeSelect = (eligibleExpressionQuery: any, valueExpressionQuery: any) => {
-    const eligibleExpression = formatQuery(eligibleExpressionQuery, isLineItemLevel)
-    const valueExpression = formatQuery(valueExpressionQuery, isLineItemLevel)
-    methods.setValue('body.EligibleExpression', eligibleExpression)
-    methods.setValue('body.ValueExpression', valueExpression)
-  }
-
-  const renderStepContent = (step: number) => {
-    switch (step) {
-      case 0:
-        return <Step1 key={step} />
-      case 1:
-        return <Step2 key={step} />
-      case 2:
-        return <Step3 key={step} />
-      case 3:
-        return <Step4 key={step} />
-      case 4:
-        return (
-          <Step5
-            key={step}
-            showUsageOptions={showUsageOptions}
-            setShowUsageOptions={setShowUsageOptions}
-          />
-        )
-      case 5:
-        return (
-          <>
-            <FormControl isInvalid={isMissingRecipe}>
-              <FormErrorMessage>Please select a recipe and submit again.</FormErrorMessage>
-            </FormControl>
-            <ExpressionRecipesSelect
-              type="Promotion"
-              onChange={handleRecipeSelect}
-              filter={(recipe) => recipe.isLineItemLevel === isLineItemLevel}
-            />
-          </>
-        )
-      default:
-        return 'Unknown step'
-    }
-  }
-
   const handleNextClick = async () => {
-    const fieldNames = stepFields[activeStep] as any
+    const fieldNames = stepFields[activeStep]
     const isValid = await methods.trigger(fieldNames)
     if (isValid) {
       goToNext()
@@ -183,6 +137,53 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
       navigate(`/promotions/${response.ID}`)
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const updateStepDescription = (stepIndex: number, description: any) => {
+    setStepDescriptions((prev) => {
+      const updated = [...prev]
+      updated[stepIndex] = description
+      return updated
+    })
+  }
+
+  const handleExpressionChange = (eligibleExpressionQuery: any, valueExpressionQuery: any) => {
+    const lineItemLevel = methods.watch('body.LineItemLevel')
+
+    const eligibleExpression = formatQuery(eligibleExpressionQuery, lineItemLevel)
+    const valueExpression = formatQuery(valueExpressionQuery, lineItemLevel)
+
+    methods.setValue('body.EligibleExpression', eligibleExpression)
+    methods.setValue('body.ValueExpression', valueExpression)
+  }
+
+  const renderStepContent = (step: number) => {
+    switch (step) {
+      case 0:
+        return <Step1 onUpdateDescription={(desc) => updateStepDescription(step, desc)} />
+      case 1:
+        return <Step2 onUpdateDescription={(desc) => updateStepDescription(step, desc)} />
+      case 2:
+        return <Step3 onUpdateDescription={(desc) => updateStepDescription(step, desc)} />
+      case 3:
+        return <Step4 onUpdateDescription={(desc) => updateStepDescription(step, desc)} />
+      case 4:
+        return <Step5 onUpdateDescription={(desc) => updateStepDescription(step, desc)} />
+      case 5:
+        return (
+          <>
+            <FormControl isInvalid={isMissingRecipe}>
+              <FormErrorMessage>Please select a recipe and submit again.</FormErrorMessage>
+            </FormControl>
+            <ExpressionRecipesSelect
+              type="Promotion"
+              onChange={handleExpressionChange}
+            />
+          </>
+        )
+      default:
+        return 'Unknown step'
     }
   }
 
@@ -203,32 +204,55 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
       >
         <ModalOverlay />
         <ModalContent>
-          <ModalHeader mb={8}>
-            <Flex flexDir="column">
+          <ModalCloseButton />
+          <ModalBody>
+            <Container
+              maxW="container.xl"
+              display="grid"
+              gridTemplateColumns="1fr 3fr"
+              mt="10vh"
+            >
               <Stepper
+                h="700px"
+                orientation="vertical"
                 colorScheme="primary"
                 index={activeStep}
-                mb={3}
+                gap={0}
+                p={8}
               >
                 {steps.map((step, index) => (
-                  <Step
+                  <Box
+                    as={Step}
                     key={index}
                     onClick={() => setActiveStep(index)}
+                    w="full"
                   >
-                    <VStack>
-                      <StepIndicator>
-                        <StepStatus
-                          complete={<StepNumber />}
-                          incomplete={<StepNumber />}
-                          active={<StepNumber />}
-                        />
-                      </StepIndicator>
+                    <StepIndicator>
+                      <StepStatus
+                        complete={<StepNumber />}
+                        incomplete={<StepNumber />}
+                        active={<StepNumber />}
+                      />
+                    </StepIndicator>
+                    <VStack
+                      ml="3"
+                      alignItems="flex-start"
+                      cursor="pointer"
+                      w="full"
+                      h="75px"
+                      rounded="md"
+                      p="3"
+                      mt={-3}
+                      _active={{ bgColor: 'blackAlpha.200' }}
+                      _hover={{ bgColor: 'blackAlpha.200' }}
+                    >
                       <Hide below="xl">
                         <StepTitle>{step}</StepTitle>
                       </Hide>
+                      <StepDescription>{stepDescriptions[index] || '...'}</StepDescription>
                     </VStack>
                     <StepSeparator />
-                  </Step>
+                  </Box>
                 ))}
               </Stepper>
               <Show below="xl">
@@ -236,52 +260,55 @@ const PromotionWizard: FC<PromotionWizardProps> = () => {
                   Step {activeStep + 1}: {steps[activeStep]}
                 </Text>
               </Show>
-            </Flex>
-          </ModalHeader>
-          <ModalCloseButton />
-          <ModalBody>
-            <FormProvider {...methods}>
-              <form
-                name="PROMOTION_FORM"
-                onSubmit={methods.handleSubmit(onSubmit)}
+              <Flex
+                borderLeft="1px solid"
+                borderColor="chakra-border-color"
+                pl={16}
+                py={8}
+                w="full"
               >
-                <Flex
-                  width="full"
-                  justifyContent="center"
-                >
-                  <VStack
-                    width="100%"
-                    maxW={500}
+                <FormProvider {...methods}>
+                  <Box
+                    as="form"
+                    w="full"
+                    name="PROMOTION_FORM"
+                    onSubmit={methods.handleSubmit(onSubmit)}
                   >
-                    {renderStepContent(activeStep)}
-                    <ButtonGroup
-                      mt={5}
-                      justifyContent={activeStep === 0 ? 'flex-end' : 'space-between'}
-                      width="full"
+                    <VStack
+                      boxSize="full"
+                      alignItems="stretch"
+                      maxW={500}
                     >
-                      {activeStep !== 0 && <Button onClick={goToPrevious}>Previous</Button>}
-                      {activeStep < steps.length - 1 && (
+                      {renderStepContent(activeStep)}
+                      <ButtonGroup
+                        mt="auto"
+                        justifyContent={activeStep === 0 ? 'flex-end' : 'space-between'}
+                        width="full"
+                      >
+                        {activeStep !== 0 && <Button onClick={goToPrevious}>Previous</Button>}
+                        {activeStep < steps.length - 1 && (
+                          <Button
+                            colorScheme="primary"
+                            onClick={handleNextClick}
+                          >
+                            Next
+                          </Button>
+                        )}
                         <Button
                           colorScheme="primary"
-                          onClick={handleNextClick}
+                          type="submit"
+                          isLoading={isLoading}
+                          loadingText="Submitting..."
+                          display={activeStep < steps.length - 1 ? 'none' : 'block'}
                         >
-                          Next
+                          Submit
                         </Button>
-                      )}
-                      <Button
-                        colorScheme="primary"
-                        type="submit"
-                        isLoading={isLoading}
-                        loadingText="Submitting..."
-                        display={activeStep < steps.length - 1 ? 'none' : ''}
-                      >
-                        Submit
-                      </Button>
-                    </ButtonGroup>
-                  </VStack>
-                </Flex>
-              </form>
-            </FormProvider>
+                      </ButtonGroup>
+                    </VStack>
+                  </Box>
+                </FormProvider>
+              </Flex>
+            </Container>
           </ModalBody>
         </ModalContent>
       </Modal>

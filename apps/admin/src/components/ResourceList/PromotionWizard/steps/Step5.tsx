@@ -1,13 +1,57 @@
-import { FormControl, FormHelperText, FormLabel, Switch } from '@chakra-ui/react'
+import { FormControl, FormHelperText, FormLabel, Switch , Text, VStack} from '@chakra-ui/react'
 import { InputControl, SwitchControl } from '../../../OperationForm/Controls'
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
+import { useWatch } from 'react-hook-form'
 
 interface Step5Props {
-    showUsageOptions: boolean
-    setShowUsageOptions: (showUsageOptions: boolean) => void
+  showUsageOptions?: boolean
+  setShowUsageOptions?: (showUsageOptions: boolean) => void
+  onUpdateDescription: (description: JSX.Element) => void
 }
-const Step5: FC<Step5Props> = ({ showUsageOptions, setShowUsageOptions }) => {
-  
+
+const Step5: FC<Step5Props> = ({ showUsageOptions, setShowUsageOptions, onUpdateDescription }) => {
+  const redemptionLimit = useWatch({ name: 'body.RedemptionLimit' })
+  const redemptionLimitPerUser = useWatch({ name: 'body.RedemptionLimitPerUser' })
+  const canCombine = useWatch({ name: 'body.CanCombine' })
+
+  useEffect(() => {
+    const usageDescription = showUsageOptions ? (
+      <VStack align="start">
+        <Text>
+          Redemption Limit:{' '}
+          <Text
+            as="span"
+            fontWeight="bold"
+          >
+            {redemptionLimit || 'N/A'}
+          </Text>
+        </Text>
+        <Text>
+          Redemption Limit Per User:{' '}
+          <Text
+            as="span"
+            fontWeight="bold"
+          >
+            {redemptionLimitPerUser || 'N/A'}
+          </Text>
+        </Text>
+        <Text>
+          Can Combine:{' '}
+          <Text
+            as="span"
+            fontWeight="bold"
+          >
+            {canCombine ? 'Yes' : 'No'}
+          </Text>
+        </Text>
+      </VStack>
+    ) : (
+      <Text fontStyle="italic">Usage limits not defined.</Text>
+    )
+
+    onUpdateDescription(usageDescription)
+  }, [showUsageOptions, redemptionLimit, redemptionLimitPerUser, canCombine, onUpdateDescription])
+
   return (
     <>
       <FormControl mb={5}>
@@ -30,7 +74,7 @@ const Step5: FC<Step5Props> = ({ showUsageOptions, setShowUsageOptions }) => {
             label="Redemption Limit"
             name="body.RedemptionLimit"
             inputMode="numeric"
-            helperText="How many times should this promotion be allowed to be used across all orders?  "
+            helperText="How many times should this promotion be allowed to be used across all orders?"
           />
           <InputControl
             label="Redemption Limit Per User"

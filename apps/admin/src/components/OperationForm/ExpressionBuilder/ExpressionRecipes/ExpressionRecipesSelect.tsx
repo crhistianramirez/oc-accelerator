@@ -128,7 +128,11 @@ export function ExpressionRecipesSelect({ onChange, type, filter }: ExpressionRe
             placement="right"
             aria-label="Tooltip for prebuilt expressions field"
           >
-            <InfoOutlineIcon />
+            <InfoOutlineIcon
+              boxSize=".8em"
+              mb="1px"
+              color="chakra-subtle-text"
+            />
           </Tooltip>
         </FormLabel>
         <Select<any, false, any>
@@ -165,7 +169,7 @@ export function ExpressionRecipesSelect({ onChange, type, filter }: ExpressionRe
                   <CustomValueEditor
                     {...valueEditorProps}
                     showInModal={true}
-                    handleOnChange={(newVal) => {
+                    handleOnChange={(newVal: string) => {
                       variables.value = newVal
                     }}
                   />

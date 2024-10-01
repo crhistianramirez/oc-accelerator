@@ -1,10 +1,35 @@
-import { FormControl, FormHelperText, HStack, Tooltip } from '@chakra-ui/react'
+import { FormControl, Text, FormHelperText, HStack, Tooltip } from '@chakra-ui/react'
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import { SwitchControl } from '../../../OperationForm/Controls'
-import { FC } from 'react'
+import { FC, useEffect } from 'react'
+import { useFormContext } from 'react-hook-form'
 
-interface Step3Props {}
-const Step3: FC<Step3Props> = () => {
+interface Step3Props {
+  onUpdateDescription: (description: JSX.Element) => void
+}
+
+const Step3: FC<Step3Props> = ({ onUpdateDescription }) => {
+  const { watch } = useFormContext()
+
+  // Watch the switch value for the form field "body.LineItemLevel"
+  const lineItemLevel = watch('body.LineItemLevel')
+
+  // Update the description whenever the switch value changes
+  useEffect(() => {
+    onUpdateDescription(
+      <Text>
+        Line Item Level:
+        <Text
+          ml="1"
+          as="span"
+          fontWeight="bold"
+        >
+          {lineItemLevel ? 'true' : 'false'}
+        </Text>
+      </Text>
+    )
+  }, [lineItemLevel, onUpdateDescription])
+
   return (
     <>
       <FormControl mb={5}>
@@ -16,8 +41,9 @@ const Step3: FC<Step3Props> = () => {
             aria-label={`Tooltip for form field body.LineItemLevel`}
           >
             <InfoOutlineIcon
-              fontSize="1em"
-              color="blackAlpha.600"
+              boxSize=".8em"
+              mb="1px"
+              color="chakra-subtle-text"
             />
           </Tooltip>
         </HStack>
