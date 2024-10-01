@@ -1,53 +1,57 @@
-import { FormControl, FormHelperText, FormLabel, Switch , Text, VStack} from '@chakra-ui/react'
+import { FormControl, FormHelperText, FormLabel, Switch, Text, VStack } from '@chakra-ui/react'
 import { InputControl, SwitchControl } from '../../../OperationForm/Controls'
 import { FC, useEffect } from 'react'
 import { useWatch } from 'react-hook-form'
 
 interface Step5Props {
-  showUsageOptions?: boolean
-  setShowUsageOptions?: (showUsageOptions: boolean) => void
   onUpdateDescription: (description: JSX.Element) => void
+  setShowUsageOptions: (showUsageOptions: boolean) => void
+  showUsageOptions: boolean
 }
 
-const Step5: FC<Step5Props> = ({ showUsageOptions, setShowUsageOptions, onUpdateDescription }) => {
-  const redemptionLimit = useWatch({ name: 'body.RedemptionLimit' })
-  const redemptionLimitPerUser = useWatch({ name: 'body.RedemptionLimitPerUser' })
-  const canCombine = useWatch({ name: 'body.CanCombine' })
+const Step5: FC<Step5Props> = ({ onUpdateDescription, setShowUsageOptions, showUsageOptions }) => {
+  const [redemptionLimit, redemptionLimitPerUser, canCombine] = useWatch({
+    name: ['body.RedemptionLimit', 'body.RedemptionLimitPerUser', 'body.CanCombine'],
+  })
 
   useEffect(() => {
     const usageDescription = showUsageOptions ? (
       <VStack align="start">
-        <Text>
-          Redemption Limit:{' '}
-          <Text
-            as="span"
-            fontWeight="bold"
-          >
-            {redemptionLimit || 'N/A'}
+        {redemptionLimit && (
+          <Text>
+            Redemption Limit:{' '}
+            <Text
+              as="span"
+              fontWeight="bold"
+            >
+              {redemptionLimit}
+            </Text>
           </Text>
-        </Text>
-        <Text>
-          Redemption Limit Per User:{' '}
-          <Text
-            as="span"
-            fontWeight="bold"
-          >
-            {redemptionLimitPerUser || 'N/A'}
+        )}
+
+        {redemptionLimitPerUser && (
+          <Text>
+            Redemption Limit Per User:{' '}
+            <Text
+              as="span"
+              fontWeight="bold"
+            >
+              {redemptionLimitPerUser}
+            </Text>
           </Text>
-        </Text>
+        )}
+
         <Text>
           Can Combine:{' '}
           <Text
             as="span"
             fontWeight="bold"
           >
-            {canCombine ? 'Yes' : 'No'}
+            {canCombine ? 'true' : 'false'}
           </Text>
         </Text>
       </VStack>
-    ) : (
-      <Text fontStyle="italic">Usage limits not defined.</Text>
-    )
+    ) : <></>
 
     onUpdateDescription(usageDescription)
   }, [showUsageOptions, redemptionLimit, redemptionLimitPerUser, canCombine, onUpdateDescription])

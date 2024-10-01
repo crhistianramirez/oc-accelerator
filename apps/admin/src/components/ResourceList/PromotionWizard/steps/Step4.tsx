@@ -1,5 +1,5 @@
 import { FormControl, FormHelperText, Text } from '@chakra-ui/react'
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useRef } from 'react'
 import { useController, useWatch } from 'react-hook-form'
 import { InputControl, SwitchControl } from '../../../OperationForm/Controls'
 
@@ -8,6 +8,7 @@ interface Step4Props {
 }
 
 const Step4: FC<Step4Props> = ({ onUpdateDescription }) => {
+  const isFirstRun = useRef(true);
   const isAutoApply = useWatch({ name: 'body.AutoApply' })
   const {
     field: { onChange: setCode, value: promoCode },
@@ -41,6 +42,12 @@ const Step4: FC<Step4Props> = ({ onUpdateDescription }) => {
   }, [isAutoApply, promoCode, onUpdateDescription])
 
   useEffect(() => {
+    // skip on first render
+    if (isFirstRun.current) {
+      console.log('skipping on first render');
+      isFirstRun.current = false;
+      return;
+    }
     const generatePromoCode = () => {
       const promoCode = generateRandomString(10)
       setCode(promoCode)
