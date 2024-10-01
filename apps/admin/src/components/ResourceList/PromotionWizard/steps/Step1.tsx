@@ -1,7 +1,7 @@
 import { FormControl, FormHelperText } from '@chakra-ui/react'
 import { InputControl } from '../../../OperationForm/Controls'
 import { FC, useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 import { VStack, Text } from '@chakra-ui/react'
 
 interface Step1Props {
@@ -9,10 +9,7 @@ interface Step1Props {
 }
 
 const Step1: FC<Step1Props> = ({ onUpdateDescription }) => {
-  const { watch } = useFormContext()
-
-  const name = watch('body.Name')
-  const description = watch('body.Description')
+  const [name, description] = useWatch({ name: ['body.Name', 'body.Description'] })
 
   useEffect(() => {
     onUpdateDescription(

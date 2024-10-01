@@ -2,17 +2,14 @@ import { FormControl, Text, FormHelperText, HStack, Tooltip } from '@chakra-ui/r
 import { InfoOutlineIcon } from '@chakra-ui/icons'
 import { SwitchControl } from '../../../OperationForm/Controls'
 import { FC, useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 
 interface Step3Props {
   onUpdateDescription: (description: JSX.Element) => void
 }
 
 const Step3: FC<Step3Props> = ({ onUpdateDescription }) => {
-  const { watch } = useFormContext()
-
-  // Watch the switch value for the form field "body.LineItemLevel"
-  const lineItemLevel = watch('body.LineItemLevel')
+  const lineItemLevel = useWatch({ name: 'body.LineItemLevel' })
 
   // Update the description whenever the switch value changes
   useEffect(() => {

@@ -1,18 +1,17 @@
-import { FormControl, FormHelperText, FormLabel, Switch , Text, VStack} from '@chakra-ui/react'
+import { FormControl, FormHelperText, FormLabel, Switch, Text, VStack } from '@chakra-ui/react'
 import { InputControl, SwitchControl } from '../../../OperationForm/Controls'
-import { FC, useEffect } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { useWatch } from 'react-hook-form'
 
 interface Step5Props {
-  showUsageOptions?: boolean
-  setShowUsageOptions?: (showUsageOptions: boolean) => void
   onUpdateDescription: (description: JSX.Element) => void
 }
 
-const Step5: FC<Step5Props> = ({ showUsageOptions, setShowUsageOptions, onUpdateDescription }) => {
-  const redemptionLimit = useWatch({ name: 'body.RedemptionLimit' })
-  const redemptionLimitPerUser = useWatch({ name: 'body.RedemptionLimitPerUser' })
-  const canCombine = useWatch({ name: 'body.CanCombine' })
+const Step5: FC<Step5Props> = ({ onUpdateDescription }) => {
+  const [showUsageOptions, setShowUsageOptions] = useState(false)
+  const [redemptionLimit, redemptionLimitPerUser, canCombine] = useWatch({
+    name: ['body.RedemptionLimit', 'body.RedemptionLimitPerUser', 'body.CanCombine'],
+  })
 
   useEffect(() => {
     const usageDescription = showUsageOptions ? (

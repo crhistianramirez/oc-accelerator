@@ -1,24 +1,18 @@
 import { FormControl, FormHelperText, Text, VStack } from '@chakra-ui/react'
 import { InputControl } from '../../../OperationForm/Controls'
 import { FC, useEffect } from 'react'
-import { useFormContext } from 'react-hook-form'
+import { useWatch } from 'react-hook-form'
 
 interface Step2Props {
   onUpdateDescription: (description: JSX.Element) => void
 }
 
 const Step2: FC<Step2Props> = ({ onUpdateDescription }) => {
-  const { getValues, watch } = useFormContext()
-
-  const startDate = watch('body.StartDate')
-  const endDate = watch('body.ExpirationDate')
+  const [startDate, endDate] = useWatch({ name: ['body.StartDate', 'body.ExpirationDate'] })
 
   useEffect(() => {
-    const currentStartDate = getValues('body.StartDate')
-    const currentEndDate = getValues('body.ExpirationDate')
-
-    const formattedStart = currentStartDate ? new Date(currentStartDate).toLocaleString() : ''
-    const formattedEnd = currentEndDate ? new Date(currentEndDate).toLocaleString() : ''
+    const formattedStart = startDate ? new Date(startDate).toLocaleString() : ''
+    const formattedEnd = endDate ? new Date(endDate).toLocaleString() : ''
 
     onUpdateDescription(
       <VStack
@@ -27,7 +21,7 @@ const Step2: FC<Step2Props> = ({ onUpdateDescription }) => {
       >
         {formattedStart && (
           <Text>
-            Promotion Name:{' '}
+            Start Date:{' '}
             <Text
               ml="1"
               as="span"
@@ -39,7 +33,7 @@ const Step2: FC<Step2Props> = ({ onUpdateDescription }) => {
         )}
         {formattedEnd && (
           <Text>
-            Description:
+            End Date:
             <Text
               ml="1"
               as="span"
@@ -51,7 +45,7 @@ const Step2: FC<Step2Props> = ({ onUpdateDescription }) => {
         )}
       </VStack>
     )
-  }, [startDate, endDate, onUpdateDescription, getValues])
+  }, [startDate, endDate, onUpdateDescription])
 
   return (
     <>
