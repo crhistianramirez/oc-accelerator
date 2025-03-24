@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 230.56 182.82">
+  <defs>
+    <style>
+      .cls-1, .cls-2 {
+        fill: #5319e0;
+      }
+
+      .cls-2 {
+        font-size: 15.58px;
+      }
+
+      .cls-2, .cls-3 {
+        font-family: Track, Track;
+      }
+
+      .cls-4 {
+        mix-blend-mode: multiply;
+        opacity: .5;
+      }
+
+      .cls-4, .cls-5 {
+        fill: #b3a4e0;
+      }
+
+      .cls-6 {
+        isolation: isolate;
+      }
+
+      .cls-3 {
+        font-size: 9.58px;
+        letter-spacing: .13em;
+      }
+
+      .cls-3, .cls-7 {
+        fill: #ba5200;
+      }
+
+      .cls-8 {
+        fill: #ececd9;
+      }
+
+      .cls-9 {
+        fill: none;
+        stroke: #5319e0;
+        stroke-miterlimit: 10;
+        stroke-width: 4px;
+      }
+    </style>
+  </defs>
+  <g class="cls-6">
+    <g id="Layer_2" data-name="Layer 2">
+      <g id="Layer_3" data-name="Layer 3">
+        <g>
+          <g>
+            <circle class="cls-7" cx="116.21" cy="89.44" r="64.62"/>
+            <path class="cls-4" d="M116.22,154.06c35.07,0,63.61-27.94,64.59-62.77l-3.2-3.7-13.83,12.66-2.36-1.33c-.71-.81-1.41-1.61-2.11-2.41-6.59-7.48-12.03-13.46-17.13-18.82l-10.93-11.49-8.18,11.94c-2.86-3.58-5.97-7.28-9.49-11.3l-7.55-8.64-22.38,25.4-9.65-8.89-21.28,26.77c5.63,29.94,31.92,52.6,63.5,52.6Z"/>
+            <polygon class="cls-8" points="181.16 77.39 140.04 76.42 181.73 71.32 181.16 77.39"/>
+            <polygon class="cls-8" points="170.3 48.04 109.78 47.36 166.7 42.91 170.3 48.04"/>
+            <polygon class="cls-8" points="54 63.22 111.43 69.48 52.16 70.54 54 63.22"/>
+            <g>
+              <g>
+                <polygon class="cls-5" points="44.37 115.2 50.47 122.49 75.4 92.68 134.33 163.16 4.28 163.16 44.37 115.2"/>
+                <polygon class="cls-4" points="44.37 115.2 50.47 122.49 75.4 92.68 134.33 163.16 4.28 163.16 44.37 115.2"/>
+                <polygon class="cls-8" points="39.2 139.99 36.62 136.87 40.87 139.08 43.46 133.48 56.26 135.91 57.91 148.36 67.7 131.78 75.16 96.31 66.27 103.59 50.47 122.49 44.37 115.2 9.5 156.92 39.2 139.99"/>
+                <polygon class="cls-9" points="44.37 115.2 50.47 122.49 75.4 92.68 134.33 163.16 4.28 163.16 44.37 115.2"/>
+              </g>
+              <g>
+                <polygon class="cls-5" points="105.99 76.42 123.56 97.43 132.85 86.32 197.09 163.16 33.48 163.16 105.99 76.42"/>
+                <polygon class="cls-4" points="124.39 134.96 121.83 114.01 130.65 107.67 127.45 94.67 126.65 93.74 123.56 97.43 118.83 91.77 118.78 91.82 121.98 104.6 115.28 113.49 124.39 134.96"/>
+                <polygon class="cls-4" points="72.43 163.16 172.87 163.16 185.37 149.14 146.85 103.07 142.62 120.67 113.88 148.05 72.43 163.16"/>
+                <polygon class="cls-8" points="128.33 117.48 143.84 109.88 138.67 103.79 137.3 91.65 132.85 86.32 125.23 95.43 128.48 109.53 119.71 114.86 125.04 136.87 128.33 117.48"/>
+                <polygon class="cls-8" points="33.48 163.16 78.85 163.16 84.56 141.44 115.28 131.51 95.51 127.78 115.28 126.93 104.41 112.35 115.28 102 114.05 86.05 105.99 76.42 33.48 163.16"/>
+                <polygon class="cls-9" points="105.99 76.42 123.56 97.43 132.85 86.32 197.09 163.16 33.48 163.16 105.99 76.42"/>
+              </g>
+              <g>
+                <polygon class="cls-5" points="161.71 112.92 165.37 117.29 176.65 103.79 226.28 163.16 119.71 163.16 161.71 112.92"/>
+                <polygon class="cls-4" points="226.28 163.16 178.22 105.67 182.66 125.35 185.37 129.95 179.52 135.91 189.16 144.4 171.36 163.16 226.28 163.16"/>
+                <polygon class="cls-8" points="149.48 163.16 166.87 150.33 173 130.48 180.89 129.01 176.86 118.17 176.27 104.25 165.37 117.29 161.71 112.92 119.71 163.16 149.48 163.16"/>
+                <polygon class="cls-9" points="161.71 112.92 165.37 117.29 176.65 103.79 226.28 163.16 119.71 163.16 161.71 112.92"/>
+              </g>
+              <polygon class="cls-1" points="185.37 129.95 184.23 126.75 178.04 105.23 173 108.16 179.86 126.3 172.57 128.79 171.5 129.15 171.32 129.97 166.87 150.33 174.25 132.05 182.46 130.42 185.37 129.95"/>
+              <polygon class="cls-1" points="130.84 111.2 129.95 108.17 125.76 93.87 122.17 97.41 126.88 108.68 118.62 112.63 117.13 113.68 117.59 115.02 125.04 136.87 122.09 115.82 128.5 112.27 130.84 111.2"/>
+              <path class="cls-1" d="M52.99,119.93c.51,1.24,4.05,14.96,3.27,15.98-1.26-.23-6.2-9.1-6.76-10.32-.56-1.22-1.09-2.45-1.54-3.71l5.03-1.94Z"/>
+            </g>
+          </g>
+          <g>
+            <circle class="cls-5" cx="29.4" cy="114.7" r="5.7" transform="translate(-76.79 62.31) rotate(-49.37)"/>
+            <circle class="cls-5" cx="203.03" cy="114.7" r="5.7" transform="translate(44.61 285.83) rotate(-76.67)"/>
+          </g>
+          <text class="cls-3" transform="translate(22.93 180.01)"><tspan x="0" y="0">Tough Gear for Every Trail</tspan></text>
+          <text class="cls-2" transform="translate(41.2 91.3) rotate(-86.27)"><tspan x="0" y="0">W</tspan></text>
+          <text class="cls-2" transform="translate(43.17 72.94) rotate(-76.3)"><tspan x="0" y="0">I</tspan></text>
+          <text class="cls-2" transform="translate(45.01 65.66) rotate(-68.4)"><tspan x="0" y="0">L</tspan></text>
+          <text class="cls-2" transform="translate(49.93 53.82) rotate(-57.7)"><tspan x="0" y="0">D</tspan></text>
+          <text class="cls-2" transform="translate(58.28 41.33) rotate(-46.72)"><tspan x="0" y="0">S</tspan></text>
+          <text class="cls-2" transform="translate(68.18 31.52) rotate(-38.56)"><tspan x="0" y="0">I</tspan></text>
+          <text class="cls-2" transform="translate(74.09 26.86) rotate(-30.53)"><tspan x="0" y="0">T</tspan></text>
+          <text class="cls-2" transform="translate(85.76 20.31) rotate(-20.1)"><tspan x="0" y="0">E</tspan></text>
+          <text class="cls-2" transform="translate(98.95 16) rotate(-11.66)"><tspan x="0" y="0"> </tspan></text>
+          <text class="cls-2" transform="translate(106.67 14.37) rotate(-2.55)"><tspan x="0" y="0">O</tspan></text>
+          <text class="cls-2" transform="translate(122.42 14.07) rotate(8.89)"><tspan x="0" y="0">U</tspan></text>
+          <text class="cls-2" transform="translate(136.53 16.65) rotate(19.62)"><tspan x="0" y="0">T</tspan></text>
+          <text class="cls-2" transform="translate(149.05 21.45) rotate(29.82)"><tspan x="0" y="0">F</tspan></text>
+          <text class="cls-2" transform="translate(160.26 28.39) rotate(37.73)"><tspan x="0" y="0">I</tspan></text>
+          <text class="cls-2" transform="translate(166.19 33.02) rotate(45.72)"><tspan x="0" y="0">T</tspan></text>
+          <text class="cls-2" transform="translate(175.34 42.84) rotate(55.94)"><tspan x="0" y="0">T</tspan></text>
+          <text class="cls-2" transform="translate(182.59 54.09) rotate(66.34)"><tspan x="0" y="0">E</tspan></text>
+          <text class="cls-2" transform="translate(187.84 66.83) rotate(77.19)"><tspan x="0" y="0">R</tspan></text>
+          <text class="cls-2" transform="translate(190.67 80.83) rotate(87.98)"><tspan x="0" y="0">S</tspan></text>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>
