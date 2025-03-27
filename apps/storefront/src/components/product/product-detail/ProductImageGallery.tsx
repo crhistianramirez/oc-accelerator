@@ -37,7 +37,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
       </Center>
     );
   }
-
+  
   return (
     <HStack
       bgColor="chakra-subtle-bg"
@@ -90,7 +90,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
           w="full"
           maxH="75vh"
           objectFit="contain"
-          src={images[selectedIndex]?.ThumbnailUrl || images[selectedIndex]?.Url}
+          src={images[selectedIndex]?.Url || images[selectedIndex]?.ThumbnailUrl}
           onError={() => setError(true)}
         />
       </Flex>

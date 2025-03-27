@@ -1,9 +1,9 @@
 import { useParams } from "react-router-dom";
-import ProductDetail from "./ProductDetail";
+import ProductDetailWithContent from "./ProductDetailWithContent";
 
 const ProductDetailWrapper = () => {
   const { productId } = useParams<{ productId: string }>();  
-  return <ProductDetail productId={productId || ""} />;
+  return <ProductDetailWithContent productId={productId || ""} />;
 };
 
 export default ProductDetailWrapper;
