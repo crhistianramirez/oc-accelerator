@@ -20,14 +20,14 @@ import {
   useOrderCloudContext,
   useShopper,
 } from "@ordercloud/react-sdk";
-import { Catalog, Categories, Category } from "ordercloud-javascript-sdk";
+import { Catalog, Category } from "ordercloud-javascript-sdk";
 import { FC, useEffect, useMemo, useState } from "react";
 import { TbShoppingCartFilled } from "react-icons/tb";
 import { Link as RouterLink } from "react-router-dom";
 import { DEFAULT_BRAND } from "../assets/DEFAULT_BRAND";
 import { useCurrentUser } from "../hooks/currentUser";
 import { BRAND_LOGO_DARK, BRAND_LOGO_LIGHT } from "../constants";
-import MegaMenu from "../layout/MegaMenu";
+import MegaMenu from "../Layout/MegaMenu";
 
 interface MainMenuProps {
   loginDisclosure: UseDisclosureProps;

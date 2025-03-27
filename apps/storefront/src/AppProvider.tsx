@@ -31,8 +31,11 @@ const AppProvider: FC = () => {
     }
   }, [toast])
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const OrderCloudProviderWithFix = OrderCloudProvider as any;
+
   return (
-    <OrderCloudProvider
+    <OrderCloudProviderWithFix
       baseApiUrl={BASE_API_URL}
       clientId={CLIENT_ID}
       scope={SCOPE}
@@ -43,7 +46,7 @@ const AppProvider: FC = () => {
     >
       <RouterProvider router={router} />
       <GlobalLoadingIndicator/>
-    </OrderCloudProvider>
+    </OrderCloudProviderWithFix>
   );
 };
 

@@ -19,9 +19,7 @@ import { useShopper } from "@ordercloud/react-sdk";
 import {
   Address,
   IntegrationEvents,
-  Order,
   Orders,
-  RequiredDeep,
 } from "ordercloud-javascript-sdk";
 import { useCallback, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
@@ -43,8 +41,6 @@ export const ShoppingCart = (): JSX.Element => {
 
   const { orderWorksheet, worksheetLoading, deleteCart, submitCart } =
     useShopper();
-
-  const [order, setOrder] = useState<RequiredDeep<Order>>();
 
   const [shippingAddress, setShippingAddress] = useState<Address>({
     FirstName: "",
