@@ -1,4 +1,4 @@
-import { FC, useCallback } from "react";
+import { FC, useCallback, useEffect } from "react";
 import routes from "./routes";
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
 import { IOrderCloudErrorContext, OrderCloudProvider } from "@ordercloud/react-sdk";
@@ -13,12 +13,17 @@ import {
 import { useToast } from "@chakra-ui/react";
 import { OrderCloudError } from "ordercloud-javascript-sdk";
 import GlobalLoadingIndicator from "./components/GlobalLoadingIndicator";
+import { init } from "./utils/search.service";
 
 const basename = import.meta.env.VITE_APP_CONFIG_BASE;
 
 const router = createBrowserRouter(routes, { basename });
 
 const AppProvider: FC = () => {
+
+  useEffect(() => {
+    init()
+  }, [])
   const toast = useToast();
 
   const defaultErrorHandler = useCallback((error: OrderCloudError, {logout}:IOrderCloudErrorContext) => {

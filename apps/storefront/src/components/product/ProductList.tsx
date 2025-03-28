@@ -32,7 +32,7 @@ import FilterSearchMenu, {
 } from "../shared/search/SearchMenu";
 import FacetList from "./facets/FacetList";
 import ProductCard from "./ProductCard";
-import { useOcResourceListWithFacets } from "@ordercloud/react-sdk";
+import { useProductList } from "../../hooks/useProductList";
 
 export interface ProductListProps {
   renderItem?: (product: BuyerProduct) => JSX.Element;
@@ -67,8 +67,7 @@ const ProductList: FunctionComponent<ProductListProps> = ({ renderItem }) => {
     return filtersObj;
   }, [searchParams]);
 
-  const { data, isLoading } = useOcResourceListWithFacets<BuyerProduct>(
-    "Me.Products",
+  const { data, isLoading } = useProductList(
     {
       search: searchTerm,
       page: currentPage.toString(),
@@ -196,11 +195,11 @@ const ProductList: FunctionComponent<ProductListProps> = ({ renderItem }) => {
         )}
       </Grid>
 
-      {data?.Meta?.TotalPages && data?.Meta?.TotalPages > 1 && (
+      {(data?.Meta?.TotalPages ?? 0) > 1 && (
         <Center>
           <Pagination
             page={currentPage}
-            totalPages={data?.Meta?.TotalPages}
+            totalPages={data?.Meta?.TotalPages ?? 0}
             onChange={handleRoutingChange("page")}
           />
         </Center>

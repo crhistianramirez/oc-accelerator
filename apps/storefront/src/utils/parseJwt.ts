@@ -1,6 +1,7 @@
 import { DecodedToken } from 'ordercloud-javascript-sdk';
 
-export default function parseJwt(token: string): DecodedToken {
+export default function parseJwt(token?: string): DecodedToken | undefined {
+  if (!token) return undefined;
   const base64 = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
   const decoded = JSON.parse(
     decodeURIComponent(
