@@ -179,7 +179,7 @@ import {
               <Text color="chakra-subtle-text" fontSize="sm">
                 {product.ID}
               </Text>
-              <div 
+              <div
                 className="prose max-w-none"
                 dangerouslySetInnerHTML={{ __html: product.Description }}
               />
@@ -228,7 +228,9 @@ import {
                             justifyContent="center"
                             flexFlow="column nowrap"
                           >
-                            <Text fontSize="sm">{item.Address.AddressName}</Text>
+                            <Text fontSize="sm">
+                              {item.Address.AddressName}
+                            </Text>
                             <Text>{item.Address.Street1}</Text>
                             {item.Address.Street2 && (
                               <Text>{item.Address.Street2}</Text>
@@ -245,51 +247,54 @@ import {
                   </HStack>
                 </>
               )}
+              {productContent.isLoading ? (
+                <Center py={8}>
+                  <Spinner size="lg" />
+                </Center>
+              ) : (
+                <>
+                  {productContent.data?.features && (
+                    <VStack spacing={4} align="stretch">
+                      <Divider />
+                      <Heading size="lg">Product Features</Heading>
+                      <div
+                        className="prose max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: productContent.data.features,
+                        }}
+                      />
+                    </VStack>
+                  )}
+
+                  {productContent.data?.technicalSpecs && (
+                    <VStack spacing={4} align="stretch" mt={8}>
+                      <Divider />
+                      <Heading size="lg">Technical Specifications</Heading>
+                      <div
+                        className="prose max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: productContent.data.technicalSpecs,
+                        }}
+                      />
+                    </VStack>
+                  )}
+
+                  {productContent.data?.sizingChart && (
+                    <VStack spacing={4} align="stretch" mt={8}>
+                      <Divider />
+                      <Heading size="lg">Sizing Chart</Heading>
+                      <div
+                        className="prose max-w-none"
+                        dangerouslySetInnerHTML={{
+                          __html: productContent.data.sizingChart,
+                        }}
+                      />
+                    </VStack>
+                  )}
+                </>
+              )}
             </VStack>
           </SimpleGrid>
-
-          <Container maxW="container.4xl">
-            {productContent.isLoading ? (
-              <Center py={8}>
-                <Spinner size="lg" />
-              </Center>
-            ) : (
-              <>
-                {productContent.data?.features && (
-                  <VStack spacing={4} align="stretch">
-                    <Divider />
-                    <Heading size="lg">Product Features</Heading>
-                    <div 
-                      className="prose max-w-none"
-                      dangerouslySetInnerHTML={{ __html: productContent.data.features }}
-                    />
-                  </VStack>
-                )}
-
-                {productContent.data?.technicalSpecs && (
-                  <VStack spacing={4} align="stretch" mt={8}>
-                    <Divider />
-                    <Heading size="lg">Technical Specifications</Heading>
-                    <div 
-                      className="prose max-w-none"
-                      dangerouslySetInnerHTML={{ __html: productContent.data.technicalSpecs }}
-                    />
-                  </VStack>
-                )}
-
-                {productContent.data?.sizingChart && (
-                  <VStack spacing={4} align="stretch" mt={8}>
-                    <Divider />
-                    <Heading size="lg">Sizing Chart</Heading>
-                    <div 
-                      className="prose max-w-none"
-                      dangerouslySetInnerHTML={{ __html: productContent.data.sizingChart }}
-                    />
-                  </VStack>
-                )}
-              </>
-            )}
-          </Container>
         </VStack>
       )
     ) : (
