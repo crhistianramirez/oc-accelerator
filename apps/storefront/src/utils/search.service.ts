@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 const searchUuidCookieName = `ordercloud.search-uuid`
 import axios from 'axios'
 import Cookies from 'universal-cookie'
@@ -98,7 +97,6 @@ interface SearchResponse {
 
 export async function searchProducts(
   searchTerm: string,
-  filters: Record<string, string>,
   page = 1,
   pageSize = 20,
 ): Promise<ListPageWithFacets<BuyerProduct>> {

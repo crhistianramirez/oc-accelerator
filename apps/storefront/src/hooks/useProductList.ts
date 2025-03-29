@@ -35,18 +35,10 @@ export function useProductList(
   const page = Number(listOptions?.page) || 1
   const pageSize = Number(listOptions?.pageSize) || 20
 
-  // Convert listOptions to filters format expected by search service
-  const filters = Object.entries(listOptions || {}).reduce((acc, [key, value]) => {
-    if (!['search', 'page', 'pageSize'].includes(key)) {
-      acc[key] = Array.isArray(value) ? value.join('|') : value as string
-    }
-    return acc
-  }, {} as Record<string, string>)
-
   return useQuery<ListPageWithFacets<BuyerProduct>, OrderCloudError, ListPageWithFacets<BuyerProduct>>({
     queryKey: ['products', listOptions],
     queryFn: async () => {
-      return searchProducts(searchTerm || '', filters, page, pageSize)
+      return searchProducts(searchTerm || '', page, pageSize)
     },
     ...queryOptions
   })
