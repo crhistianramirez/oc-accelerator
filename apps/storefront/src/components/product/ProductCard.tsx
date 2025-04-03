@@ -58,14 +58,15 @@ const ProductCard: FunctionComponent<ProductCardProps> = ({ product }) => {
               >
                 {product.xp?.Images &&
                 (product.xp.Images[0]?.ThumbnailUrl ||
-                  product.xp.Images[0]?.Url) ? (
+                  product.xp.Images[0]?.Url || product.xp.Images[0].OriginalUrl) ? (
                   <Image
                     borderTopRadius="md"
                     boxSize="full"
                     objectFit="cover"
                     src={
                       product.xp.Images[0]?.ThumbnailUrl ||
-                      product.xp.Images[0]?.Url
+                      product.xp.Images[0]?.Url ||
+                      product.xp.Images[0].OriginalUrl
                     }
                     zIndex={1}
                     bgColor="white"

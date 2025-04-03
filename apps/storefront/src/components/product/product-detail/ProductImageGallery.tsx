@@ -13,6 +13,7 @@ import { TbPhoto } from "react-icons/tb";
 type ProductImage = {
   ThumbnailUrl?: string;
   Url: string;
+  OriginalUrl: string;
 };
 
 interface ProductImageGalleryProps {
@@ -74,7 +75,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
               <Image
                 boxSize="60px"
                 objectFit="cover"
-                src={image.ThumbnailUrl || image.Url}
+                src={image.ThumbnailUrl || image.Url || image.OriginalUrl}
               />
             </Button>
           ))}
@@ -90,7 +91,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
           w="full"
           maxH="75vh"
           objectFit="contain"
-          src={images[selectedIndex]?.Url || images[selectedIndex]?.ThumbnailUrl}
+          src={images[selectedIndex]?.Url || images[selectedIndex]?.ThumbnailUrl || images[selectedIndex]?.OriginalUrl}
           onError={() => setError(true)}
         />
       </Flex>

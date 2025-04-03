@@ -85,7 +85,8 @@ import {
 
         return {
           Url: originalUrl,
-          ThumbnailUrl: thumbnailUrl
+          ThumbnailUrl: thumbnailUrl,
+          OriginalUrl: ''
         };
       });
     }, [productContent.data?.images]);
