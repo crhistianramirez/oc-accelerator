@@ -13,6 +13,8 @@ import {
 import { parseToken, useOrderCloudContext } from "@ordercloud/react-sdk";
 import { AccessToken, OrderCloudError } from "ordercloud-javascript-sdk";
 import { FC, FormEvent, useCallback, useState } from "react";
+import { fetchIdentityToken } from "../../utils/search.service";
+
 
 interface ILoginForm {
   initialFocusRef?: React.RefObject<HTMLInputElement>;
@@ -50,6 +52,7 @@ const LoginForm: FC<ILoginForm> = ({ initialFocusRef, onSuccess }) => {
       let authResponse
       try {
         authResponse = await login(username, password, rememberMe)
+        await fetchIdentityToken()
         setError(undefined);
         if (!isBuyerUser(authResponse)) {
           //The Sitecore Commerce team does not recommend using this application with non-seller users.
