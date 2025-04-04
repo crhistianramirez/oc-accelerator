@@ -28,6 +28,7 @@ import { DEFAULT_BRAND } from "../assets/DEFAULT_BRAND";
 import { useCurrentUser } from "../hooks/currentUser";
 import { BRAND_LOGO_DARK, BRAND_LOGO_LIGHT } from "../constants";
 import MegaMenu from "../Layout/MegaMenu";
+import { fetchIdentityToken } from "../utils/search.service";
 
 interface MainMenuProps {
   loginDisclosure: UseDisclosureProps;
@@ -47,6 +48,11 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
     undefined,
     { staleTime: 300000 }
   );
+
+  const handleLogout = async () => {
+    await logout();
+    await fetchIdentityToken();
+  };
 
   const catalogs = useMemo(() => catalogData?.Items ?? [], [catalogData]);
 
