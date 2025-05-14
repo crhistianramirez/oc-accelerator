@@ -19,7 +19,7 @@ const ALLOW_ANONYMOUS: boolean = Boolean(ALLOW_ANONYMOUS_STRING === 'true')
 const THEME_COLOR_PRIMARY = import.meta.env.VITE_APP_PUBLIC_THEME_COLOR_PRIMARY
 const THEME_COLOR_SECONDARY = import.meta.env.VITE_APP_PUBLIC_THEME_COLOR_SECONDARY
 const THEME_COLOR_ACCENT = import.meta.env.VITE_APP_PUBLIC_THEME_COLOR_ACCENT
-const THEME_LOGO_URL = import.meta.env.VITE_APP_PUBLIC_THEME_LOGO_URL
+const THEME_LOGO_URL = 'https://mma.prnewswire.com/media/2003364/DigiKey_New_Logo.jpg'
 
 export {
   APP_NAME,

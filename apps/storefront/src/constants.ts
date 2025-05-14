@@ -29,7 +29,6 @@ const IS_AUTO_APPLY_STRING = import.meta.env
   .VITE_APP_ORDERCLOUD_AUTO_APPLY_PROMOS;
 const IS_AUTO_APPLY = Boolean(IS_AUTO_APPLY_STRING === "true");
 
-
 const BRAND_COLOR_PRIMARY =
   import.meta.env.VITE_APP_ORDERCLOUD_BRAND_COLOR_PRIMARY || "";
 const BRAND_COLOR_SECONDARY =
@@ -37,29 +36,29 @@ const BRAND_COLOR_SECONDARY =
 const BRAND_COLOR_ACCENT =
   import.meta.env.VITE_APP_ORDERCLOUD_BRAND_COLOR_ACCENT || "";
 
-  const BRAND_LOGO_LIGHT =
-    import.meta.env.VITE_APP_ORDERCLOUD_BRAND_LOGO_LIGHT || "";
-  const BRAND_LOGO_DARK =
-    import.meta.env.VITE_APP_ORDERCLOUD_BRAND_LOGO_DARK || "";
-  const BRAND_FAVICON_LIGHT =
-    import.meta.env.VITE_APP_ORDERCLOUD_BRAND_LOGO_LIGHT || "";
-  const BRAND_FAVICON_DARK =
-    import.meta.env.VITE_APP_ORDERCLOUD_BRAND_LOGO_DARK || "";
+const BRAND_LOGO_LIGHT =
+  "https://mma.prnewswire.com/media/2003364/DigiKey_New_Logo.jpg";
+const BRAND_LOGO_DARK =
+  "https://mma.prnewswire.com/media/2003364/DigiKey_New_Logo.jpg";
+const BRAND_FAVICON_LIGHT =
+  "https://mma.prnewswire.com/media/2003364/DigiKey_New_Logo.jpg";
+const BRAND_FAVICON_DARK =
+  "https://mma.prnewswire.com/media/2003364/DigiKey_New_Logo.jpg";
 
 // Dashboard configs
 const DASHBOARD_HERO_TAGLINE =
   import.meta.env.VITE_APP_ORDERCLOUD_DASHBOARD_HERO_TAGLINE ||
-  `Welcome to ${APP_NAME} storefront app`;
-const DASHBOARD_HERO_IMAGE = import.meta.env
-  .VITE_APP_ORDERCLOUD_DASHBOARD_HERO_IMAGE;
+  `Welcome to DigiKey's storefront app`;
+const DASHBOARD_HERO_IMAGE =
+  "https://sc-c.digikeyassets.com/-/media/Images/Homepage/Carousel/2024/04-shipping-boxes.jpg";
 const DASHBOARD_HERO_CTA_TEXT =
   import.meta.env.VITE_APP_ORDERCLOUD_DASHBOARD_HERO_CTA_TEXT ||
   "Call to action";
 const DASHBOARD_HERO_CTA_LINK = import.meta.env
   .VITE_APP_ORDERCLOUD_DASHBOARD_HERO_CTA_LINK;
 
-const DASHBOARD_SECONDARY_IMAGE = import.meta.env
-  .VITE_APP_ORDERCLOUD_DASHBOARD_SECONDARY_IMAGE;
+const DASHBOARD_SECONDARY_IMAGE =
+  "https://sc-a.digikeyassets.com/-/media/Images/Homepage/Carousel/2025/DigiKeyStandard.jpg";
 const DASHBOARD_SECONDARY_HEADING =
   import.meta.env.VITE_APP_ORDERCLOUD_DASHBOARD_SECONDARY_HEADING ||
   "Secondary heading text";
@@ -72,8 +71,8 @@ const DASHBOARD_SECONDARY_CTA_TEXT =
 const DASHBOARD_SECONDARY_CTA_LINK = import.meta.env
   .VITE_APP_ORDERCLOUD_DASHBOARD_SECONDARY_CTA_LINK;
 
-const DASHBOARD_TERTIARY_IMAGE = import.meta.env
-  .VITE_APP_ORDERCLOUD_DASHBOARD_TERTIARY_IMAGE;
+const DASHBOARD_TERTIARY_IMAGE =
+  "https://sc-b.digikeyassets.com/-/media/Images/Homepage/Carousel/2025/Memory.jpg";
 const DASHBOARD_TERTIARY_HEADING =
   import.meta.env.VITE_APP_ORDERCLOUD_DASHBOARD_TERTIARY_HEADING ||
   "Tertiary heading text";
@@ -158,16 +157,13 @@ export {
   ALLOW_ANONYMOUS,
   IS_MULTI_LOCATION_INVENTORY,
   IS_AUTO_APPLY,
-
   BRAND_COLOR_PRIMARY,
   BRAND_COLOR_SECONDARY,
   BRAND_COLOR_ACCENT,
-
   BRAND_LOGO_LIGHT,
   BRAND_LOGO_DARK,
   BRAND_FAVICON_LIGHT,
   BRAND_FAVICON_DARK,
-
   DASHBOARD_HERO_TAGLINE,
   DASHBOARD_HERO_IMAGE,
   DASHBOARD_HERO_CTA_LINK,
