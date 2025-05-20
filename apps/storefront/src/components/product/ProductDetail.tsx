@@ -163,6 +163,22 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     });
   };
 
+  const generateFacetQueryString = (facets: Record<string, string[]>) => {
+    const params = new URLSearchParams();
+    params.set("catalogId", "catalog");
+    Object.entries(facets).forEach(([key, values]) => {
+      if (values.length > 0) {
+        params.set(`xp.Facets.${key}`, values.join(", "));
+      }
+    });
+    return params.toString();
+  };
+
+  const hasSelectedFacets = useMemo(
+    () => Object.values(selectedFacets).some((values) => values.length > 0),
+    [selectedFacets]
+  );
+
   useEffect(() => {
     const fetchFacetResults = async () => {
       const params: Record<string, any> = {
@@ -267,10 +283,23 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                   })}
                 </Tbody>
               </Table>
+
               {facetCount !== null && (
-                <Text>
-                  <strong>Matching products:</strong> {facetCount}
-                </Text>
+                <HStack justifyContent="space-between" w="full">
+                  <Text>
+                    <strong>Matching products:</strong> {facetCount}
+                  </Text>
+                  <Button
+                    as="a"
+                    colorScheme="primary"
+                    href={`/shop/catalog/products?${generateFacetQueryString(
+                      selectedFacets
+                    )}`}
+                    isDisabled={!hasSelectedFacets}
+                  >
+                    View Similar
+                  </Button>
+                </HStack>
               )}
             </VStack>
           )}
