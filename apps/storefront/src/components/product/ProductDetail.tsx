@@ -246,20 +246,25 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {Object.entries(product.xp.Facets).map(([key, value]) => (
-                    <Tr key={key}>
-                      <Td>{key}</Td>
-                      <Td>{String(value)}</Td>
-                      <Td>
-                        <Checkbox
-                          isChecked={selectedFacets[key]?.includes(value)}
-                          onChange={() =>
-                            handleCheckboxChange(key, String(value))
-                          }
-                        />
-                      </Td>
-                    </Tr>
-                  ))}
+                  {Object.entries(product.xp.Facets).map(([key, value]) => {
+                    const stringValue = String(value);
+                    return (
+                      <Tr key={key}>
+                        <Td>{key}</Td>
+                        <Td>{stringValue}</Td>
+                        <Td>
+                          <Checkbox
+                            isChecked={selectedFacets[key]?.includes(
+                              stringValue
+                            )}
+                            onChange={() =>
+                              handleCheckboxChange(key, stringValue)
+                            }
+                          />
+                        </Td>
+                      </Tr>
+                    );
+                  })}
                 </Tbody>
               </Table>
               {facetCount !== null && (
