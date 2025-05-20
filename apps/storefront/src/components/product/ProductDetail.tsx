@@ -4,18 +4,26 @@ import {
   CardBody,
   CardFooter,
   Center,
+  Checkbox,
   Container,
   Heading,
   HStack,
   SimpleGrid,
   Spinner,
+  Table,
+  Tbody,
+  Td,
   Text,
+  Th,
+  Thead,
+  Tr,
   useToast,
   VStack,
 } from "@chakra-ui/react";
 import {
   BuyerProduct,
   InventoryRecord,
+  Me,
   OrderCloudError,
 } from "ordercloud-javascript-sdk";
 import pluralize from "pluralize";
@@ -63,6 +71,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     [product?.Inventory?.QuantityAvailable]
   );
   const { addCartLineItem } = useShopper();
+
+  const [selectedFacets, setSelectedFacets] = useState<{
+    [key: string]: string[];
+  }>({});
+  const [facetCount, setFacetCount] = useState<number | null>(null);
 
   useEffect(() => {
     const availableRecord = inventoryRecords?.Items.find(
@@ -127,7 +140,54 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
         });
       }
     }
-  }, [product, activeRecordId, productId, toast, addCartLineItem, quantity, navigate]);
+  }, [
+    product,
+    activeRecordId,
+    productId,
+    toast,
+    addCartLineItem,
+    quantity,
+    navigate,
+  ]);
+
+  const handleCheckboxChange = (facetKey: string, facetValue: string) => {
+    setSelectedFacets((prev) => {
+      const currentValues = prev[facetKey] || [];
+      const isSelected = currentValues.includes(facetValue);
+      return {
+        ...prev,
+        [facetKey]: isSelected
+          ? currentValues.filter((v) => v !== facetValue)
+          : [...currentValues, facetValue],
+      };
+    });
+  };
+
+  useEffect(() => {
+    const fetchFacetResults = async () => {
+      const params: Record<string, any> = {
+        page: 1,
+        catalogId: "catalog",
+      };
+
+      Object.entries(selectedFacets).forEach(([key, values]) => {
+        if (values.length > 0) {
+          params[`xp.Facets.${key}`] = values.join(", ");
+        }
+      });
+
+      try {
+        const res = await Me.ListProducts(params);
+        setFacetCount(res?.Meta?.TotalCount ?? 0);
+        console.log("Facet-based product count:", res?.Meta?.TotalCount);
+      } catch (err) {
+        console.error("Failed to fetch facet-based results", err);
+        setFacetCount(null);
+      }
+    };
+
+    fetchFacetResults();
+  }, [selectedFacets]);
 
   return loading ? (
     <Center h="50vh">
@@ -172,6 +232,44 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
               onChange={setQuantity}
             />
           </HStack>
+
+          {/* Facet Table */}
+          {product?.xp?.Facets && (
+            <VStack align="start" w="full" gap={4}>
+              <Heading size="md">Product Attributes</Heading>
+              <Table variant="simple" size="sm">
+                <Thead>
+                  <Tr>
+                    <Th>Facet</Th>
+                    <Th>Value</Th>
+                    <Th>Filter</Th>
+                  </Tr>
+                </Thead>
+                <Tbody>
+                  {Object.entries(product.xp.Facets).map(([key, value]) => (
+                    <Tr key={key}>
+                      <Td>{key}</Td>
+                      <Td>{String(value)}</Td>
+                      <Td>
+                        <Checkbox
+                          isChecked={selectedFacets[key]?.includes(value)}
+                          onChange={() =>
+                            handleCheckboxChange(key, String(value))
+                          }
+                        />
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+              {facetCount !== null && (
+                <Text>
+                  <strong>Matching products:</strong> {facetCount}
+                </Text>
+              )}
+            </VStack>
+          )}
+
           {!outOfStock && IS_MULTI_LOCATION_INVENTORY && (
             <>
               <Heading size="sm" color="chakra-subtle-text">
