@@ -57,12 +57,13 @@ const ProductList: FunctionComponent<ProductListProps> = ({ renderItem }) => {
   }, [searchParams]);
 
   const filters = useMemo(() => {
-    const filtersObj = {} as { [key: string]: string | string[] };
+    const filtersObj: { [key: string]: string | string[] } = {
+      IsParent: "true",
+    };
     for (const key of searchParams.keys()) {
       if (!["search", "page", "pageSize"].includes(key)) {
         filtersObj[key] = searchParams.getAll(key);
       }
-      searchParams.getAll(key);
     }
     return filtersObj;
   }, [searchParams]);
