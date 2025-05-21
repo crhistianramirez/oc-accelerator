@@ -3,6 +3,7 @@
 import borders from "./borders"
 import breakpoints from "./breakpoints"
 import colors from "./colors"
+import fonts from "./fonts"
 import radii from "./radius"
 // import shadows from "./shadows";
 import sizes from "./sizes"
@@ -16,6 +17,7 @@ const foundations = {
   radii,
   blur,
   colors,
+  fonts,
   ...typography,
   sizes,
   //   ...shadows,

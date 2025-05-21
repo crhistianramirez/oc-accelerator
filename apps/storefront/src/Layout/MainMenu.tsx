@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Container,
+  DarkMode,
   Heading,
   HStack,
   Icon,
@@ -109,6 +110,7 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
           as={RouterLink}
           to={`/shop/${catalogs[0].ID}/products`}
           variant="ghost"
+          color="white"
         >
           Shop All Products
         </Button>
@@ -119,15 +121,15 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
 
   return (
     <HStack
-      h="12"
+      h="14"
       as="header"
       position="sticky"
       w="full"
       top="0"
       zIndex={2}
-      bgColor="whiteAlpha.600"
+      bgColor="blackAlpha.900"
       borderBottom="1px solid"
-      borderColor="whiteAlpha.900"
+      borderColor="blackAlpha.800"
       px="8"
       backdropFilter="auto"
       backdropBlur="5px"
@@ -137,9 +139,9 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
         <HStack h="100%" justify="flex-start" alignItems="center">
           <RouterLink to="/">
             {BRAND_LOGO_LIGHT ? (
-              <Image src={BRAND_LOGO_LIGHT} alt="WildSite Logo" h="10" />
+              <Image src={BRAND_LOGO_LIGHT} alt="" w="100px" />
             ) : BRAND_LOGO_DARK ? (
-              <Image src={BRAND_LOGO_DARK} alt="WildSite Logo (Dark)" h="10" />
+              <Image src={BRAND_LOGO_DARK} h="10" />
             ) : (
               <DEFAULT_BRAND h="10" />
             )}
@@ -150,6 +152,7 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
                 isActive={megaMenuDisclosure.isOpen}
                 size="sm"
                 variant="ghost"
+                color="white"
                 onClick={megaMenuDisclosure.onToggle}
               >
                 Categories
@@ -168,6 +171,9 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
               to="/cart"
               variant="outline"
               size="sm"
+              colorScheme="whiteAlpha"
+              color="white"
+
               leftIcon={
                 totalQuantity !== 0 ? (
                   <Box position="relative" mt="2px" mr="2px" lineHeight="1">

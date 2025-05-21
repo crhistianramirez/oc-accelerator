@@ -186,7 +186,7 @@ const getColorOrDefault = (brandColor: string, defaultColor: object) =>
 // export const DEFAULT_THEME_ACCENT = basePalette.colors.gray;
 
 const colors = {
-  primary: getColorOrDefault(BRAND_COLOR_PRIMARY, basePalette.colors.green),
+  primary: getColorOrDefault(BRAND_COLOR_PRIMARY, basePalette.colors.red),
   secondary: getColorOrDefault(BRAND_COLOR_SECONDARY, basePalette.colors.gray),
   accent: getColorOrDefault(BRAND_COLOR_ACCENT, basePalette.colors.gray),
 
