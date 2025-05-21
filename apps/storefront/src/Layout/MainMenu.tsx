@@ -3,7 +3,6 @@ import {
   Box,
   Button,
   Container,
-  DarkMode,
   Heading,
   HStack,
   Icon,
@@ -173,7 +172,6 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
               size="sm"
               colorScheme="whiteAlpha"
               color="white"
-
               leftIcon={
                 totalQuantity !== 0 ? (
                   <Box position="relative" mt="2px" mr="2px" lineHeight="1">
