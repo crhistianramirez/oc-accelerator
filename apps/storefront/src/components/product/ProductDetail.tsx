@@ -278,14 +278,22 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
   };
 
   const generateFacetQueryString = (facets: Record<string, string[]>) => {
-    const params = new URLSearchParams();
-    params.set("catalogId", "catalog");
-    Object.entries(facets).forEach(([key, values]) => {
+    const parts: string[] = [];
+
+    parts.push("IsParent=true");
+    parts.push("catalogID=catalog");
+
+    for (const [key, values] of Object.entries(facets)) {
       if (values.length > 0) {
-        params.set(`xp.Facets.${key}`, values.join(", "));
+        // Encode each value individually, but preserve the pipe separator
+        const encodedValues = values
+          .map((v) => encodeURIComponent(v))
+          .join("|");
+        parts.push(`xp.Facets.${key}=${encodedValues}`);
       }
-    });
-    return params.toString();
+    }
+
+    return parts.join("&");
   };
 
   const hasSelectedFacets = useMemo(
@@ -360,20 +368,20 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
 
   useEffect(() => {
     const fetchFacetResults = async () => {
-      const params: Record<string, any> = {
-        page: 1,
-        catalogId: "catalog",
-        filters: { IsParent: true },
-      };
-
-      Object.entries(selectedFacets).forEach(([key, values]) => {
-        if (values.length > 0) {
-          params[`xp.Facets.${key}`] = values.join(", ");
-        }
-      });
-
       try {
-        const res = await Me.ListProducts(params);
+        // Build the full query string
+        const queryString = generateFacetQueryString(selectedFacets);
+
+        // Convert the query string back into an object for Me.ListProducts
+        const searchParams = new URLSearchParams(queryString);
+        const filters: Record<string, string> = {};
+
+        for (const [key, value] of searchParams.entries()) {
+          filters[key] = value;
+        }
+
+        const res = await Me.ListProducts({ filters, page: 1 });
+
         setFacetCount(res?.Meta?.TotalCount ?? 0);
         console.log("Facet-based product count:", res?.Meta?.TotalCount);
       } catch (err) {
@@ -468,6 +476,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     ));
   };
 
+  const formatFacetKey = (key: string): string =>
+    key
+      .replace(/([a-z0-9])([A-Z])/g, "$1 $2") // Add space between camelCase words
+      .replace(/^./, (str) => str.toUpperCase()); // Capitalize first letter
+
   return loading ? (
     <Center h="50vh">
       <Spinner size="xl" thickness="10px" />
@@ -484,7 +497,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
         maxW="container.4xl"
       >
         <VStack alignItems="flex-start" gap={6}>
-          <ProductImageGallery images={product.xp?.Images || []} />
+          <Box maxW="400px" w="100%">
+            <ProductImageGallery images={product.xp?.Images || []} />
+          </Box>
           {product?.xp?.Facets && (
             <VStack align="start" w="full" gap={4}>
               <Heading size="md">Product Attributes</Heading>
@@ -492,38 +507,44 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                 <Table variant="simple" size="sm">
                   <Thead>
                     <Tr>
-                      <Th>Facet</Th>
-                      <Th>Value</Th>
-                      <Th>Filter</Th>
+                      <Th>Type</Th>
+                      <Th>Description</Th>
+                      <Th>Select</Th>
                     </Tr>
                   </Thead>
                   <Tbody>
                     {Object.entries(product.xp.Facets).map(([key, value]) => {
-                      const stringValue = String(value);
-                      return (
-                        <Tr key={key}>
-                          <Td>{key}</Td>
-                          <Td>{stringValue}</Td>
-                          <Td>
-                            <Checkbox
-                              isChecked={selectedFacets[key]?.includes(
-                                stringValue
-                              )}
-                              onChange={() =>
-                                handleCheckboxChange(key, stringValue)
-                              }
-                            />
-                          </Td>
-                        </Tr>
-                      );
+                      const valuesArray = Array.isArray(value)
+                        ? value
+                        : [value];
+
+                      return valuesArray.map((val, index) => {
+                        const stringValue = String(val);
+                        return (
+                          <Tr key={`${key}-${stringValue}`}>
+                            <Td fontWeight="bold">
+                              {index === 0 ? formatFacetKey(key) : ""}
+                            </Td>
+                            <Td>{stringValue}</Td>
+                            <Td>
+                              <Checkbox
+                                isChecked={selectedFacets[key]?.includes(
+                                  stringValue
+                                )}
+                                onChange={() =>
+                                  handleCheckboxChange(key, stringValue)
+                                }
+                              />
+                            </Td>
+                          </Tr>
+                        );
+                      });
                     })}
                   </Tbody>
                 </Table>
                 {facetCount !== null && (
-                  <HStack justifyContent="space-between" w="full">
-                    <Text>
-                      <strong>Matching products:</strong> {facetCount}
-                    </Text>
+                  <HStack justifyContent="flex-end" spacing={4} w="full">
+                    <Text fontWeight="medium">{facetCount} remaining</Text>
                     <Button
                       as="a"
                       colorScheme="primary"
