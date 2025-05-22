@@ -1,9 +1,6 @@
 import {
   Box,
   Button,
-  Card,
-  CardBody,
-  CardFooter,
   Center,
   Checkbox,
   Container,
@@ -21,19 +18,14 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { BuyerProduct, InventoryRecord, Me } from "ordercloud-javascript-sdk";
+import { BuyerProduct, Me } from "ordercloud-javascript-sdk";
 import pluralize from "pluralize";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { IS_MULTI_LOCATION_INVENTORY } from "../../constants";
 import formatPrice from "../../utils/formatPrice";
 import OcQuantityInput from "../cart/OcQuantityInput";
 import ProductImageGallery from "./product-detail/ProductImageGallery";
-import {
-  useOcResourceGet,
-  useOcResourceList,
-  useShopper,
-} from "@ordercloud/react-sdk";
+import { useOcResourceGet, useShopper } from "@ordercloud/react-sdk";
 
 export interface ProductDetailProps {
   productId: string;
@@ -50,12 +42,12 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     "Me.Products",
     { productID: productId }
   );
-  const { data: inventoryRecords } = useOcResourceList<InventoryRecord>(
-    "Me.ProductInventoryRecords",
-    undefined,
-    { productID: productId },
-    { disabled: !IS_MULTI_LOCATION_INVENTORY }
-  );
+  // const { data: inventoryRecords } = useOcResourceList<InventoryRecord>(
+  //   "Me.ProductInventoryRecords",
+  //   undefined,
+  //   { productID: productId },
+  //   { disabled: !IS_MULTI_LOCATION_INVENTORY }
+  // );
 
   const [childProducts, setChildProducts] = useState<BuyerProduct[]>([]);
   const [addingToCart, setAddingToCart] = useState(false);
@@ -63,10 +55,10 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
   const [selectedVariantID, setSelectedVariantID] = useState<string | null>(
     null
   );
-  const outOfStock = useMemo(
-    () => product?.Inventory?.QuantityAvailable === 0,
-    [product?.Inventory?.QuantityAvailable]
-  );
+  // const outOfStock = useMemo(
+  //   () => product?.Inventory?.QuantityAvailable === 0,
+  //   [product?.Inventory?.QuantityAvailable]
+  // );
   const { addCartLineItem } = useShopper();
 
   const [selectedFacets, setSelectedFacets] = useState<{
