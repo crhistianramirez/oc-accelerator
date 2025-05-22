@@ -96,29 +96,40 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     fetchChildProducts();
   }, [product]);
 
+  const hasCTorDR = !!ct || !!dr;
+
   const effectiveProduct = useMemo(() => {
     if (quantity <= 0 || !childProducts.length) return null;
 
-    // Try to find exact match among non-CT/DR children
-    const exactMatch = childProducts.find((p) =>
-      p.PriceSchedule?.PriceBreaks?.some((pb) => pb.Quantity === quantity)
-    );
+    if (hasCTorDR) {
+      // STRICT: only match exact price breaks or fallback to CT/DR
+      const exactMatch = childProducts.find((p) =>
+        p.PriceSchedule?.PriceBreaks?.some((pb) => pb.Quantity === quantity)
+      );
 
-    if (exactMatch && exactMatch.ID !== ct?.ID && exactMatch.ID !== dr?.ID) {
-      return exactMatch;
+      if (exactMatch && exactMatch.ID !== ct?.ID && exactMatch.ID !== dr?.ID) {
+        return exactMatch;
+      }
+
+      if (selectedVariantID) {
+        return childProducts.find((p) => p.ID === selectedVariantID) ?? null;
+      }
+
+      if (ct?.PriceSchedule?.PriceBreaks?.length) return ct;
+      if (dr?.PriceSchedule?.PriceBreaks?.length) return dr;
+
+      return null;
+    } else {
+      // FLEXIBLE: find best fit product that can fulfill any quantity
+      return (
+        childProducts.find((p) =>
+          p.PriceSchedule?.PriceBreaks?.some(
+            (pb) => quantity >= (pb.Quantity ?? 0)
+          )
+        ) ?? null
+      );
     }
-
-    // If user made a selection, honor it
-    if (selectedVariantID) {
-      return childProducts.find((p) => p.ID === selectedVariantID) ?? null;
-    }
-
-    // Default to Cut Tape if there's leftover quantity or fallback needed
-    if (ct?.PriceSchedule?.PriceBreaks?.length) return ct;
-    if (dr?.PriceSchedule?.PriceBreaks?.length) return dr;
-
-    return null;
-  }, [quantity, childProducts, selectedVariantID, ct, dr]);
+  }, [quantity, childProducts, selectedVariantID, ct, dr, hasCTorDR]);
 
   useEffect(() => {
     const needsSplit =
@@ -153,31 +164,49 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
       return null;
     }
 
-    let bestMatch = null;
-    let maxBreakQty = 0;
+    let bestMatch: BuyerProduct | null = null;
+    let maxUsableQty = 0;
+
     for (const variant of standardVariants) {
-      const eligibleBreaks = variant.PriceSchedule?.PriceBreaks?.filter(
-        (pb) => pb.Quantity && pb.Quantity <= quantity
-      );
-      const maxBreak = eligibleBreaks?.sort(
-        (a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0)
-      )[0];
-      if (maxBreak && maxBreak.Quantity! > maxBreakQty) {
+      const breaks = [...(variant.PriceSchedule?.PriceBreaks || [])]
+        .filter((pb) => typeof pb.Quantity === "number" && pb.Quantity! > 0)
+        .sort((a, b) => b.Quantity! - a.Quantity!); // sort desc
+
+      if (!breaks.length) continue;
+
+      let usedQty = 0;
+      let remaining = quantity;
+
+      for (const pb of breaks) {
+        const times = Math.floor(remaining / pb.Quantity!);
+        if (times > 0) {
+          usedQty += pb.Quantity! * times;
+          remaining -= pb.Quantity! * times;
+        }
+      }
+
+      if (usedQty > maxUsableQty) {
+        maxUsableQty = usedQty;
         bestMatch = variant;
-        maxBreakQty = maxBreak.Quantity!;
       }
     }
 
-    if (!bestMatch || maxBreakQty === 0) return null;
+    if (!bestMatch || maxUsableQty === 0) return null;
 
-    const leftoverQty = quantity - maxBreakQty;
+    const leftoverQty = quantity - maxUsableQty;
+
     return {
       standardProduct: bestMatch,
-      standardQty: maxBreakQty,
+      standardQty: maxUsableQty,
       leftoverQty,
-      fallbackProduct: selectedVariantID === dr?.ID ? dr : ct, // must be selected
+      fallbackProduct: selectedVariantID === dr?.ID ? dr : ct,
     };
   }, [quantity, standardVariants, ct, dr, selectedVariantID]);
+
+  const isAddToCartDisabled =
+    quantity <= 0 ||
+    addingToCart ||
+    (ct && dr && (quantitySplit?.leftoverQty ?? 0) > 0 && !selectedVariantID);
 
   const handleAddToCart = useCallback(async () => {
     if (quantity <= 0) return;
@@ -186,13 +215,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
       setAddingToCart(true);
 
       if (quantitySplit) {
-        // Add the standard product first
         await addCartLineItem({
           ProductID: quantitySplit.standardProduct.ID!,
           Quantity: quantitySplit.standardQty,
         });
 
-        // Then add the fallback (CT/DR) product if there's leftover quantity
         if (
           quantitySplit.leftoverQty > 0 &&
           quantitySplit.fallbackProduct?.ID
@@ -309,22 +336,27 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     if (quantitySplit) {
       const stdBreaks =
         quantitySplit.standardProduct.PriceSchedule?.PriceBreaks || [];
-      const stdUnit = stdBreaks
-        .sort((a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0))
-        .find((pb) => quantitySplit.standardQty >= (pb.Quantity ?? 0))?.Price;
+      const highestStdBreak = [...stdBreaks].sort(
+        (a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0)
+      )[0];
+      const stdUnitPrice = highestStdBreak?.Price ?? 0;
 
-      const fallbackUnit = (ct?.PriceSchedule?.PriceBreaks || [])
-        .sort((a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0))
-        .find((pb) => quantitySplit.leftoverQty >= (pb.Quantity ?? 0))?.Price;
+      const ctBreaks =
+        quantitySplit.fallbackProduct?.PriceSchedule?.PriceBreaks || [];
+      const ctUnitPrice =
+        [...ctBreaks]
+          .sort((a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0))
+          .find((pb) => quantitySplit.leftoverQty >= (pb.Quantity ?? 0))
+          ?.Price ?? 0;
 
       return (
-        (stdUnit ?? 0) * quantitySplit.standardQty +
-        (fallbackUnit ?? 0) * quantitySplit.leftoverQty
+        stdUnitPrice * quantitySplit.standardQty +
+        ctUnitPrice * quantitySplit.leftoverQty
       );
     }
 
     return unitPrice !== null ? unitPrice * quantity : null;
-  }, [quantitySplit, unitPrice, quantity, ct]);
+  }, [quantitySplit, unitPrice, quantity]);
 
   useEffect(() => {
     const fetchFacetResults = async () => {
@@ -548,11 +580,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                 quantity={quantity}
                 onChange={setQuantity}
               />
-              {unitPrice !== null && (
-                <Text fontSize="md">
-                  Cost: {formatPrice(totalCost ?? undefined)}
-                </Text>
-              )}
               {quantity > 0 &&
                 (effectiveProduct?.ID === ct?.ID ||
                   effectiveProduct?.ID === dr?.ID) && (
@@ -581,9 +608,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                     )}
                   </HStack>
                 )}
-              {(quantitySplit || effectiveProduct) && (
+              {quantity > 0 && (
                 <Box w="full">
-                  <Heading size="sm" mb={2}>
+                  <Heading size="sm" mb={2} fontWeight="semibold">
                     Order Breakdown
                   </Heading>
                   <Table variant="simple" size="sm">
@@ -598,53 +625,44 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                     <Tbody>
                       {quantitySplit ? (
                         <>
-                          {/* Standard product row */}
                           <Tr>
                             <Td>{quantitySplit.standardProduct.Name}</Td>
                             <Td isNumeric>{quantitySplit.standardQty}</Td>
                             <Td isNumeric>
-                              {(() => {
-                                const breaks =
-                                  quantitySplit.standardProduct.PriceSchedule
-                                    ?.PriceBreaks ?? [];
-                                const unit =
-                                  breaks
-                                    .sort(
-                                      (a, b) =>
-                                        (b.Quantity ?? 0) - (a.Quantity ?? 0)
-                                    )
-                                    .find(
-                                      (pb) =>
-                                        quantitySplit.standardQty >=
-                                        (pb.Quantity ?? 0)
-                                    )?.Price ?? 0;
-                                return formatPrice(unit);
-                              })()}
+                              {formatPrice(
+                                [
+                                  ...(quantitySplit.standardProduct
+                                    .PriceSchedule?.PriceBreaks || []),
+                                ]
+                                  .sort(
+                                    (a, b) =>
+                                      (b.Quantity ?? 0) - (a.Quantity ?? 0)
+                                  )
+                                  .find(
+                                    (pb) =>
+                                      quantitySplit.standardQty >=
+                                      (pb.Quantity ?? 0)
+                                  )?.Price ?? 0
+                              )}
                             </Td>
                             <Td isNumeric>
-                              {(() => {
-                                const breaks =
-                                  quantitySplit.standardProduct.PriceSchedule
-                                    ?.PriceBreaks ?? [];
-                                const unit =
-                                  breaks
-                                    .sort(
-                                      (a, b) =>
-                                        (b.Quantity ?? 0) - (a.Quantity ?? 0)
-                                    )
-                                    .find(
-                                      (pb) =>
-                                        quantitySplit.standardQty >=
-                                        (pb.Quantity ?? 0)
-                                    )?.Price ?? 0;
-                                return formatPrice(
-                                  unit * quantitySplit.standardQty
-                                );
-                              })()}
+                              {formatPrice(
+                                ([
+                                  ...(quantitySplit.standardProduct
+                                    .PriceSchedule?.PriceBreaks || []),
+                                ]
+                                  .sort(
+                                    (a, b) =>
+                                      (b.Quantity ?? 0) - (a.Quantity ?? 0)
+                                  )
+                                  .find(
+                                    (pb) =>
+                                      quantitySplit.standardQty >=
+                                      (pb.Quantity ?? 0)
+                                  )?.Price ?? 0) * quantitySplit.standardQty
+                              )}
                             </Td>
                           </Tr>
-
-                          {/* Leftover (CT/DR) product row */}
                           {quantitySplit.leftoverQty > 0 &&
                             quantitySplit.fallbackProduct && (
                               <Tr>
@@ -658,75 +676,110 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                                 </Td>
                                 <Td isNumeric>{quantitySplit.leftoverQty}</Td>
                                 <Td isNumeric>
-                                  {(() => {
-                                    const breaks =
-                                      quantitySplit.fallbackProduct
-                                        ?.PriceSchedule?.PriceBreaks ?? [];
-                                    const unit =
-                                      breaks
-                                        .sort(
-                                          (a, b) =>
-                                            (b.Quantity ?? 0) -
-                                            (a.Quantity ?? 0)
-                                        )
-                                        .find(
-                                          (pb) =>
-                                            quantitySplit.leftoverQty >=
-                                            (pb.Quantity ?? 0)
-                                        )?.Price ?? 0;
-                                    return formatPrice(unit);
-                                  })()}
+                                  {formatPrice(
+                                    [
+                                      ...(quantitySplit.fallbackProduct
+                                        .PriceSchedule?.PriceBreaks || []),
+                                    ]
+                                      .sort(
+                                        (a, b) =>
+                                          (b.Quantity ?? 0) - (a.Quantity ?? 0)
+                                      )
+                                      .find(
+                                        (pb) =>
+                                          quantitySplit.leftoverQty >=
+                                          (pb.Quantity ?? 0)
+                                      )?.Price ?? 0
+                                  )}
                                 </Td>
                                 <Td isNumeric>
-                                  {(() => {
-                                    const breaks =
-                                      quantitySplit.fallbackProduct
-                                        ?.PriceSchedule?.PriceBreaks ?? [];
-                                    const unit =
-                                      breaks
-                                        .sort(
-                                          (a, b) =>
-                                            (b.Quantity ?? 0) -
-                                            (a.Quantity ?? 0)
-                                        )
-                                        .find(
-                                          (pb) =>
-                                            quantitySplit.leftoverQty >=
-                                            (pb.Quantity ?? 0)
-                                        )?.Price ?? 0;
-                                    return formatPrice(
-                                      unit * quantitySplit.leftoverQty
-                                    );
-                                  })()}
+                                  {formatPrice(
+                                    ([
+                                      ...(quantitySplit.fallbackProduct
+                                        .PriceSchedule?.PriceBreaks || []),
+                                    ]
+                                      .sort(
+                                        (a, b) =>
+                                          (b.Quantity ?? 0) - (a.Quantity ?? 0)
+                                      )
+                                      .find(
+                                        (pb) =>
+                                          quantitySplit.leftoverQty >=
+                                          (pb.Quantity ?? 0)
+                                      )?.Price ?? 0) * quantitySplit.leftoverQty
+                                  )}
                                 </Td>
                               </Tr>
                             )}
                         </>
-                      ) : effectiveProduct && quantity > 0 ? (
+                      ) : effectiveProduct ? (
                         <Tr>
                           <Td>
-                            {effectiveProduct.ID === ct?.ID
-                              ? "Cut Tape"
-                              : effectiveProduct.ID === dr?.ID
-                                ? "Digi-Reel®"
-                                : effectiveProduct.Name}
+                            {groupedCTDR?.ids.includes(effectiveProduct.ID!)
+                              ? selectedVariantID === ct?.ID
+                                ? "Cut Tape"
+                                : selectedVariantID === dr?.ID
+                                  ? "Digi-Reel®"
+                                  : groupedCTDR.label
+                              : effectiveProduct.Name}
                           </Td>
                           <Td isNumeric>{quantity}</Td>
-                          <Td isNumeric>{formatPrice(unitPrice ?? 0)}</Td>
                           <Td isNumeric>
-                            {formatPrice((unitPrice ?? 0) * quantity)}
+                            {formatPrice(
+                              [
+                                ...(effectiveProduct.PriceSchedule
+                                  ?.PriceBreaks || []),
+                              ]
+                                .sort(
+                                  (a, b) =>
+                                    (b.Quantity ?? 0) - (a.Quantity ?? 0)
+                                )
+                                .find((pb) => quantity >= (pb.Quantity ?? 0))
+                                ?.Price ?? 0
+                            )}
+                          </Td>
+                          <Td isNumeric>
+                            {formatPrice(
+                              ([
+                                ...(effectiveProduct.PriceSchedule
+                                  ?.PriceBreaks || []),
+                              ]
+                                .sort(
+                                  (a, b) =>
+                                    (b.Quantity ?? 0) - (a.Quantity ?? 0)
+                                )
+                                .find((pb) => quantity >= (pb.Quantity ?? 0))
+                                ?.Price ??
+                                0 ??
+                                0) * quantity
+                            )}
                           </Td>
                         </Tr>
-                      ) : null}
+                      ) : (
+                        <Tr>
+                          <Td colSpan={4}>
+                            <Text>
+                              No matching variant could be determined.
+                            </Text>
+                          </Td>
+                        </Tr>
+                      )}
                     </Tbody>
                   </Table>
                 </Box>
               )}
-
+              {unitPrice !== null && (
+                <Text fontSize="4xl" fontWeight="semibold" color="gray.800">
+                  {/* Cost:{" "} */}
+                  <Text as="span" fontWeight="bold">
+                    {formatPrice(totalCost ?? undefined)}
+                  </Text>
+                </Text>
+              )}
               <Button
                 colorScheme="primary"
                 onClick={handleAddToCart}
-                isDisabled={addingToCart || quantity <= 0 || !effectiveProduct}
+                isDisabled={isAddToCartDisabled}
               >
                 Add to Cart
               </Button>
