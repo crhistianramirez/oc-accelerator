@@ -79,14 +79,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
   );
   const dr = childProducts.find((p) => p.PriceSchedule?.Name === "Digi-Reel®");
 
-  useEffect(() => {
-    const availableRecord = inventoryRecords?.Items.find(
-      (item) => item.QuantityAvailable > 0
-    );
-    if (availableRecord) {
-      setActiveRecordId(availableRecord.ID);
-    }
-  }, [inventoryRecords?.Items]);
+  // useEffect(() => {
+  //   const availableRecord = inventoryRecords?.Items.find(
+  //     (item) => item.QuantityAvailable > 0
+  //   );
+  //   if (availableRecord) {
+  //     setActiveRecordId(availableRecord.ID);
+  //   }
+  // }, [inventoryRecords?.Items]);
 
   useEffect(() => {
     const fetchChildProducts = async () => {
@@ -750,7 +750,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
             </VStack>
           )}
 
-          {!outOfStock && IS_MULTI_LOCATION_INVENTORY && (
+          {/* {!outOfStock && IS_MULTI_LOCATION_INVENTORY && (
             <>
               <Heading size="sm" color="chakra-subtle-text">
                 {`(${inventoryRecords?.Items.length}) locations with inventory`}
@@ -791,7 +791,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                 ))}
               </HStack>
             </>
-          )}
+          )} */}
         </VStack>
       </SimpleGrid>
     )
