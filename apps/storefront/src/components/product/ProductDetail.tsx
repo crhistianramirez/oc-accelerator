@@ -21,12 +21,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import {
-  BuyerProduct,
-  InventoryRecord,
-  Me,
-  OrderCloudError,
-} from "ordercloud-javascript-sdk";
+import { BuyerProduct, InventoryRecord, Me } from "ordercloud-javascript-sdk";
 import pluralize from "pluralize";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -51,7 +46,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
 }) => {
   const navigate = useNavigate();
   const toast = useToast();
-  const [activeRecordId, setActiveRecordId] = useState<string>();
   const { data: product, isLoading: loading } = useOcResourceGet<BuyerProduct>(
     "Me.Products",
     { productID: productId }
@@ -339,11 +333,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
 
     return unitPrice !== null ? unitPrice * quantity : null;
   }, [quantitySplit, unitPrice, quantity, ct]);
-
-  const isAddToCartDisabled =
-    quantity <= 0 ||
-    addingToCart ||
-    ((quantitySplit?.leftoverQty ?? 0) > 0 && !selectedVariantID);
 
   useEffect(() => {
     const fetchFacetResults = async () => {
