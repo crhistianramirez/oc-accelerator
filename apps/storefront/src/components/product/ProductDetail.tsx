@@ -65,8 +65,9 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
 
   const [childProducts, setChildProducts] = useState<BuyerProduct[]>([]);
   const [addingToCart, setAddingToCart] = useState(false);
-  const [quantity, setQuantity] = useState(
-    product?.PriceSchedule?.MinQuantity ?? 1
+  const [quantity, setQuantity] = useState<number>(0);
+  const [selectedVariantID, setSelectedVariantID] = useState<string | null>(
+    null
   );
   const outOfStock = useMemo(
     () => product?.Inventory?.QuantityAvailable === 0,
@@ -78,6 +79,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     [key: string]: string[];
   }>({});
   const [facetCount, setFacetCount] = useState<number | null>(null);
+
+  const ct = childProducts.find(
+    (p) => p.PriceSchedule?.Name === "Cut Tape (CT)"
+  );
+  const dr = childProducts.find((p) => p.PriceSchedule?.Name === "Digi-Reel®");
 
   useEffect(() => {
     const availableRecord = inventoryRecords?.Items.find(
@@ -104,68 +110,144 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     fetchChildProducts();
   }, [product]);
 
-  const handleAddToCart = useCallback(async () => {
-    if (!product) {
-      console.warn("[ProductDetail.tsx] Product not found for ID:", productId);
-      return <div>Product not found for ID: {productId}</div>;
+  const effectiveProduct = useMemo(() => {
+    if (quantity <= 0 || !childProducts.length) return null;
+
+    // Try to find exact match among non-CT/DR children
+    const exactMatch = childProducts.find((p) =>
+      p.PriceSchedule?.PriceBreaks?.some((pb) => pb.Quantity === quantity)
+    );
+
+    if (exactMatch && exactMatch.ID !== ct?.ID && exactMatch.ID !== dr?.ID) {
+      return exactMatch;
     }
 
-    if (IS_MULTI_LOCATION_INVENTORY && !activeRecordId) {
-      toast({
-        title: "No Inventory Available",
-        description: "Please select a store with available inventory.",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-      });
-      return;
+    // If user made a selection, honor it
+    if (selectedVariantID) {
+      return childProducts.find((p) => p.ID === selectedVariantID) ?? null;
     }
+
+    // Default to Cut Tape if there's leftover quantity or fallback needed
+    if (ct?.PriceSchedule?.PriceBreaks?.length) return ct;
+    if (dr?.PriceSchedule?.PriceBreaks?.length) return dr;
+
+    return null;
+  }, [quantity, childProducts, selectedVariantID, ct, dr]);
+
+  useEffect(() => {
+    const needsSplit =
+      quantity > 0 &&
+      effectiveProduct?.ID === ct?.ID &&
+      !selectedVariantID &&
+      ct?.ID;
+
+    if (needsSplit) {
+      setSelectedVariantID(ct.ID!); // Default to Cut Tape
+    }
+  }, [quantity, effectiveProduct, selectedVariantID, ct]);
+
+  const standardVariants = useMemo(
+    () =>
+      childProducts.filter(
+        (p) =>
+          p.ID !== ct?.ID &&
+          p.ID !== dr?.ID &&
+          p.PriceSchedule?.PriceBreaks?.length
+      ),
+    [childProducts, ct?.ID, dr?.ID]
+  );
+
+  // NEW LOGIC: Find best fit standard variant for as much quantity as possible
+  const quantitySplit = useMemo(() => {
+    if (
+      quantity <= 0 ||
+      !standardVariants.length ||
+      !ct?.PriceSchedule?.PriceBreaks
+    ) {
+      return null;
+    }
+
+    let bestMatch = null;
+    let maxBreakQty = 0;
+    for (const variant of standardVariants) {
+      const eligibleBreaks = variant.PriceSchedule?.PriceBreaks?.filter(
+        (pb) => pb.Quantity && pb.Quantity <= quantity
+      );
+      const maxBreak = eligibleBreaks?.sort(
+        (a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0)
+      )[0];
+      if (maxBreak && maxBreak.Quantity! > maxBreakQty) {
+        bestMatch = variant;
+        maxBreakQty = maxBreak.Quantity!;
+      }
+    }
+
+    if (!bestMatch || maxBreakQty === 0) return null;
+
+    const leftoverQty = quantity - maxBreakQty;
+    return {
+      standardProduct: bestMatch,
+      standardQty: maxBreakQty,
+      leftoverQty,
+      fallbackProduct: selectedVariantID === dr?.ID ? dr : ct, // must be selected
+    };
+  }, [quantity, standardVariants, ct, dr, selectedVariantID]);
+
+  const handleAddToCart = useCallback(async () => {
+    if (quantity <= 0) return;
 
     try {
       setAddingToCart(true);
-      await addCartLineItem({
-        ProductID: productId,
-        Quantity: quantity,
-        InventoryRecordID: activeRecordId,
-      });
-      setAddingToCart(false);
+
+      if (quantitySplit) {
+        // Add the standard product first
+        await addCartLineItem({
+          ProductID: quantitySplit.standardProduct.ID!,
+          Quantity: quantitySplit.standardQty,
+        });
+
+        // Then add the fallback (CT/DR) product if there's leftover quantity
+        if (
+          quantitySplit.leftoverQty > 0 &&
+          quantitySplit.fallbackProduct?.ID
+        ) {
+          await addCartLineItem({
+            ProductID: quantitySplit.fallbackProduct.ID!,
+            Quantity: quantitySplit.leftoverQty,
+          });
+        }
+      } else if (effectiveProduct?.ID) {
+        await addCartLineItem({
+          ProductID: effectiveProduct.ID,
+          Quantity: quantity,
+        });
+      }
+
       toast({
         title: `${quantity} ${pluralize("item", quantity)} added to cart`,
         status: "success",
         duration: 5000,
         isClosable: true,
       });
+
       navigate("/cart");
     } catch (error) {
+      toast({
+        title: "Error",
+        description: "Could not add item(s) to cart.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
       setAddingToCart(false);
-      if (error instanceof OrderCloudError) {
-        toast({
-          title: "Error adding to cart",
-          description:
-            error.message ||
-            "Please ensure all required specifications are filled out.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      } else {
-        console.error("Failed to add item to cart:", error);
-        toast({
-          title: "Error",
-          description: "An unexpected error occurred. Please try again.",
-          status: "error",
-          duration: 5000,
-          isClosable: true,
-        });
-      }
     }
   }, [
-    product,
-    activeRecordId,
-    productId,
-    toast,
-    addCartLineItem,
     quantity,
+    effectiveProduct,
+    quantitySplit,
+    addCartLineItem,
+    toast,
     navigate,
   ]);
 
@@ -217,6 +299,52 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     });
   };
 
+  const unifiedBreaks =
+    ct &&
+    dr &&
+    arePriceBreaksEqual(
+      ct.PriceSchedule?.PriceBreaks,
+      dr.PriceSchedule?.PriceBreaks
+    )
+      ? ct.PriceSchedule?.PriceBreaks || []
+      : [];
+
+  const unitPrice = useMemo(() => {
+    const breaks = effectiveProduct?.PriceSchedule?.PriceBreaks;
+    if (!breaks) return null;
+    const matching = breaks
+      .filter((pb) => typeof pb.Quantity === "number")
+      .sort((a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0))
+      .find((pb) => quantity >= (pb.Quantity ?? 0));
+    return matching?.Price ?? null;
+  }, [effectiveProduct, quantity]);
+
+  const totalCost = useMemo(() => {
+    if (quantitySplit) {
+      const stdBreaks =
+        quantitySplit.standardProduct.PriceSchedule?.PriceBreaks || [];
+      const stdUnit = stdBreaks
+        .sort((a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0))
+        .find((pb) => quantitySplit.standardQty >= (pb.Quantity ?? 0))?.Price;
+
+      const fallbackUnit = (ct?.PriceSchedule?.PriceBreaks || [])
+        .sort((a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0))
+        .find((pb) => quantitySplit.leftoverQty >= (pb.Quantity ?? 0))?.Price;
+
+      return (
+        (stdUnit ?? 0) * quantitySplit.standardQty +
+        (fallbackUnit ?? 0) * quantitySplit.leftoverQty
+      );
+    }
+
+    return unitPrice !== null ? unitPrice * quantity : null;
+  }, [quantitySplit, unitPrice, quantity, ct]);
+
+  const isAddToCartDisabled =
+    quantity <= 0 ||
+    addingToCart ||
+    ((quantitySplit?.leftoverQty ?? 0) > 0 && !selectedVariantID);
+
   useEffect(() => {
     const fetchFacetResults = async () => {
       const params: Record<string, any> = {
@@ -244,19 +372,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     fetchFacetResults();
   }, [selectedFacets]);
 
-  const renderGroupedChildProducts = () => {
-    const grouped: {
-      label: string;
-      priceBreaks: { Quantity: number; Price: number }[];
-    }[] = [];
-    const used = new Set<string>();
-    const ct = childProducts.find(
-      (p) => p.PriceSchedule?.Name === "Cut Tape (CT)"
-    );
-    const dr = childProducts.find(
-      (p) => p.PriceSchedule?.Name === "Digi-Reel®"
-    );
-
+  const groupedCTDR = useMemo(() => {
     if (
       ct &&
       dr &&
@@ -265,15 +381,31 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
         dr.PriceSchedule?.PriceBreaks
       )
     ) {
-      grouped.push({
+      return {
         label: "Cut Tape (CT) & Digi-Reel®",
         priceBreaks: (ct.PriceSchedule?.PriceBreaks || []).filter(
           (pb): pb is { Quantity: number; Price: number } =>
             typeof pb.Quantity === "number" && typeof pb.Price === "number"
         ),
+        ids: [ct.ID, dr.ID],
+      };
+    }
+    return null;
+  }, [ct, dr]);
+
+  const renderGroupedChildProducts = () => {
+    const grouped: {
+      label: string;
+      priceBreaks: { Quantity: number; Price: number }[];
+    }[] = [];
+    const used = new Set<string>();
+
+    if (groupedCTDR) {
+      grouped.push({
+        label: groupedCTDR.label,
+        priceBreaks: groupedCTDR.priceBreaks,
       });
-      ct.ID && used.add(ct.ID);
-      dr.ID && used.add(dr.ID);
+      groupedCTDR.ids.forEach((id) => id && used.add(id));
     }
 
     childProducts.forEach((p) => {
@@ -406,7 +538,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
             {formatPrice(product?.PriceSchedule?.PriceBreaks?.[0].Price)}
           </Text>
 
-          {!product.IsParent && (
+          {/* {!product.IsParent && (
             <HStack alignItems="center" gap={4} my={3}>
               <Button
                 colorScheme="primary"
@@ -423,7 +555,203 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                 onChange={setQuantity}
               />
             </HStack>
+          )} */}
+          {product.IsParent && childProducts.length > 0 && (
+            <VStack align="start" spacing={4} w="full">
+              <OcQuantityInput
+                controlId="dynamicQuantity"
+                priceSchedule={{
+                  Name: "Dynamic", // Required dummy value
+                  PriceBreaks: unifiedBreaks,
+                }}
+                quantity={quantity}
+                onChange={setQuantity}
+              />
+              {unitPrice !== null && (
+                <Text fontSize="md">
+                  Cost: {formatPrice(totalCost ?? undefined)}
+                </Text>
+              )}
+              {quantity > 0 &&
+                (effectiveProduct?.ID === ct?.ID ||
+                  effectiveProduct?.ID === dr?.ID) && (
+                  <HStack>
+                    {ct && (
+                      <Button
+                        onClick={() => setSelectedVariantID(ct.ID!)}
+                        variant={
+                          selectedVariantID === ct.ID ? "solid" : "outline"
+                        }
+                        colorScheme="secondary"
+                      >
+                        Choose Cut Tape
+                      </Button>
+                    )}
+                    {dr && (
+                      <Button
+                        onClick={() => setSelectedVariantID(dr.ID!)}
+                        variant={
+                          selectedVariantID === dr.ID ? "solid" : "outline"
+                        }
+                        colorScheme="secondary"
+                      >
+                        Choose Digi-Reel
+                      </Button>
+                    )}
+                  </HStack>
+                )}
+              {(quantitySplit || effectiveProduct) && (
+                <Box w="full">
+                  <Heading size="sm" mb={2}>
+                    Order Breakdown
+                  </Heading>
+                  <Table variant="simple" size="sm">
+                    <Thead>
+                      <Tr>
+                        <Th>Variant</Th>
+                        <Th isNumeric>Quantity</Th>
+                        <Th isNumeric>Unit Price</Th>
+                        <Th isNumeric>Subtotal</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {quantitySplit ? (
+                        <>
+                          {/* Standard product row */}
+                          <Tr>
+                            <Td>{quantitySplit.standardProduct.Name}</Td>
+                            <Td isNumeric>{quantitySplit.standardQty}</Td>
+                            <Td isNumeric>
+                              {(() => {
+                                const breaks =
+                                  quantitySplit.standardProduct.PriceSchedule
+                                    ?.PriceBreaks ?? [];
+                                const unit =
+                                  breaks
+                                    .sort(
+                                      (a, b) =>
+                                        (b.Quantity ?? 0) - (a.Quantity ?? 0)
+                                    )
+                                    .find(
+                                      (pb) =>
+                                        quantitySplit.standardQty >=
+                                        (pb.Quantity ?? 0)
+                                    )?.Price ?? 0;
+                                return formatPrice(unit);
+                              })()}
+                            </Td>
+                            <Td isNumeric>
+                              {(() => {
+                                const breaks =
+                                  quantitySplit.standardProduct.PriceSchedule
+                                    ?.PriceBreaks ?? [];
+                                const unit =
+                                  breaks
+                                    .sort(
+                                      (a, b) =>
+                                        (b.Quantity ?? 0) - (a.Quantity ?? 0)
+                                    )
+                                    .find(
+                                      (pb) =>
+                                        quantitySplit.standardQty >=
+                                        (pb.Quantity ?? 0)
+                                    )?.Price ?? 0;
+                                return formatPrice(
+                                  unit * quantitySplit.standardQty
+                                );
+                              })()}
+                            </Td>
+                          </Tr>
+
+                          {/* Leftover (CT/DR) product row */}
+                          {quantitySplit.leftoverQty > 0 &&
+                            quantitySplit.fallbackProduct && (
+                              <Tr>
+                                <Td>
+                                  {quantitySplit.fallbackProduct.ID === ct?.ID
+                                    ? "Cut Tape"
+                                    : quantitySplit.fallbackProduct.ID ===
+                                        dr?.ID
+                                      ? "Digi-Reel®"
+                                      : quantitySplit.fallbackProduct.Name}
+                                </Td>
+                                <Td isNumeric>{quantitySplit.leftoverQty}</Td>
+                                <Td isNumeric>
+                                  {(() => {
+                                    const breaks =
+                                      quantitySplit.fallbackProduct
+                                        ?.PriceSchedule?.PriceBreaks ?? [];
+                                    const unit =
+                                      breaks
+                                        .sort(
+                                          (a, b) =>
+                                            (b.Quantity ?? 0) -
+                                            (a.Quantity ?? 0)
+                                        )
+                                        .find(
+                                          (pb) =>
+                                            quantitySplit.leftoverQty >=
+                                            (pb.Quantity ?? 0)
+                                        )?.Price ?? 0;
+                                    return formatPrice(unit);
+                                  })()}
+                                </Td>
+                                <Td isNumeric>
+                                  {(() => {
+                                    const breaks =
+                                      quantitySplit.fallbackProduct
+                                        ?.PriceSchedule?.PriceBreaks ?? [];
+                                    const unit =
+                                      breaks
+                                        .sort(
+                                          (a, b) =>
+                                            (b.Quantity ?? 0) -
+                                            (a.Quantity ?? 0)
+                                        )
+                                        .find(
+                                          (pb) =>
+                                            quantitySplit.leftoverQty >=
+                                            (pb.Quantity ?? 0)
+                                        )?.Price ?? 0;
+                                    return formatPrice(
+                                      unit * quantitySplit.leftoverQty
+                                    );
+                                  })()}
+                                </Td>
+                              </Tr>
+                            )}
+                        </>
+                      ) : effectiveProduct && quantity > 0 ? (
+                        <Tr>
+                          <Td>
+                            {effectiveProduct.ID === ct?.ID
+                              ? "Cut Tape"
+                              : effectiveProduct.ID === dr?.ID
+                                ? "Digi-Reel®"
+                                : effectiveProduct.Name}
+                          </Td>
+                          <Td isNumeric>{quantity}</Td>
+                          <Td isNumeric>{formatPrice(unitPrice ?? 0)}</Td>
+                          <Td isNumeric>
+                            {formatPrice((unitPrice ?? 0) * quantity)}
+                          </Td>
+                        </Tr>
+                      ) : null}
+                    </Tbody>
+                  </Table>
+                </Box>
+              )}
+
+              <Button
+                colorScheme="primary"
+                onClick={handleAddToCart}
+                isDisabled={addingToCart || quantity <= 0 || !effectiveProduct}
+              >
+                Add to Cart
+              </Button>
+            </VStack>
           )}
+
           {product.IsParent && childProducts.length > 0 && (
             <VStack align="start" spacing={6} mt={6} width="full">
               <Heading size="md">Available Variants</Heading>
