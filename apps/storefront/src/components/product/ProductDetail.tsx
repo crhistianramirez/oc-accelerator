@@ -344,10 +344,11 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
     if (quantitySplit) {
       const stdBreaks =
         quantitySplit.standardProduct.PriceSchedule?.PriceBreaks || [];
-      const highestStdBreak = [...stdBreaks].sort(
-        (a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0)
-      )[0];
-      const stdUnitPrice = highestStdBreak?.Price ?? 0;
+      const stdUnitPrice =
+        [...stdBreaks]
+          .sort((a, b) => (b.Quantity ?? 0) - (a.Quantity ?? 0))
+          .find((pb) => quantitySplit.standardQty >= (pb.Quantity ?? 0))
+          ?.Price ?? 0;
 
       const ctBreaks =
         quantitySplit.fallbackProduct?.PriceSchedule?.PriceBreaks || [];
@@ -358,12 +359,14 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
           ?.Price ?? 0;
 
       return (
-        stdUnitPrice * quantitySplit.standardQty +
-        ctUnitPrice * quantitySplit.leftoverQty
+        parseFloat((stdUnitPrice * quantitySplit.standardQty).toFixed(2)) +
+        parseFloat((ctUnitPrice * quantitySplit.leftoverQty).toFixed(2))
       );
     }
 
-    return unitPrice !== null ? unitPrice * quantity : null;
+    return unitPrice !== null
+      ? parseFloat((unitPrice * quantity).toFixed(2))
+      : null;
   }, [quantitySplit, unitPrice, quantity]);
 
   useEffect(() => {
@@ -571,25 +574,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
           <Text fontSize="3xl" fontWeight="medium">
             {formatPrice(product?.PriceSchedule?.PriceBreaks?.[0].Price)}
           </Text>
-
-          {/* {!product.IsParent && (
-            <HStack alignItems="center" gap={4} my={3}>
-              <Button
-                colorScheme="primary"
-                type="button"
-                onClick={handleAddToCart}
-                isDisabled={addingToCart || outOfStock}
-              >
-                {outOfStock ? "Out of stock" : "Add To Cart"}
-              </Button>
-              <OcQuantityInput
-                controlId="addToCart"
-                priceSchedule={product.PriceSchedule}
-                quantity={quantity}
-                onChange={setQuantity}
-              />
-            </HStack>
-          )} */}
           {product.IsParent && childProducts.length > 0 && (
             <VStack align="start" spacing={4} w="full">
               <OcQuantityInput
@@ -815,49 +799,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
               </Box>
             </VStack>
           )}
-
-          {/* {!outOfStock && IS_MULTI_LOCATION_INVENTORY && (
-            <>
-              <Heading size="sm" color="chakra-subtle-text">
-                {`(${inventoryRecords?.Items.length}) locations with inventory`}
-              </Heading>
-              <HStack spacing={4}>
-                {inventoryRecords?.Items.map((item) => (
-                  <Button
-                    onClick={() => setActiveRecordId(item.ID)}
-                    cursor="pointer"
-                    variant="outline"
-                    as={Card}
-                    h="150px"
-                    aspectRatio="1 / 1"
-                    key={item.ID}
-                    isDisabled={item.QuantityAvailable === 0}
-                  >
-                    <CardBody
-                      fontSize="xs"
-                      p={1}
-                      display="flex"
-                      alignItems="flex-start"
-                      justifyContent="center"
-                      flexFlow="column nowrap"
-                    >
-                      <Text fontSize="sm">{item.Address.AddressName}</Text>
-                      <Text>{item.Address.Street1}</Text>
-                      {item.Address.Street2 && (
-                        <Text>{item.Address.Street2}</Text>
-                      )}
-                      <Text>Stock: {item.QuantityAvailable}</Text>
-                    </CardBody>
-                    <CardFooter py={2} fontSize="xs">
-                      {item.QuantityAvailable === 0
-                        ? "Out of stock"
-                        : "Select This Store"}
-                    </CardFooter>
-                  </Button>
-                ))}
-              </HStack>
-            </>
-          )} */}
         </VStack>
       </SimpleGrid>
     )
