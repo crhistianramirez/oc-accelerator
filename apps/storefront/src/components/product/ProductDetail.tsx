@@ -520,7 +520,6 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                       const valuesArray = Array.isArray(value)
                         ? value
                         : [value];
-
                       return valuesArray.map((val, index) => {
                         const stringValue = String(val);
                         return (
@@ -563,7 +562,7 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
           )}
         </VStack>
 
-        <VStack alignItems="flex-start" maxW="4xl" gap={4}>
+        <VStack alignItems="flex-start" maxW="4xl" gap={6}>
           <Heading maxW="2xl" size="xl">
             {product.Name}
           </Heading>
@@ -574,48 +573,59 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
           <Text fontSize="3xl" fontWeight="medium">
             {formatPrice(product?.PriceSchedule?.PriceBreaks?.[0].Price)}
           </Text>
+
           {product.IsParent && childProducts.length > 0 && (
-            <VStack align="start" spacing={4} w="full">
-              <OcQuantityInput
-                controlId="dynamicQuantity"
-                priceSchedule={{
-                  Name: "Dynamic", // Required dummy value
-                  PriceBreaks: unifiedBreaks,
-                }}
-                quantity={quantity}
-                onChange={setQuantity}
-              />
-              {quantity > 0 &&
-                (effectiveProduct?.ID === ct?.ID ||
-                  effectiveProduct?.ID === dr?.ID) && (
-                  <HStack>
-                    {ct && (
-                      <Button
-                        onClick={() => setSelectedVariantID(ct.ID!)}
-                        variant={
-                          selectedVariantID === ct.ID ? "solid" : "outline"
-                        }
-                        colorScheme="secondary"
-                      >
-                        Choose Cut Tape
-                      </Button>
-                    )}
-                    {dr && (
-                      <Button
-                        onClick={() => setSelectedVariantID(dr.ID!)}
-                        variant={
-                          selectedVariantID === dr.ID ? "solid" : "outline"
-                        }
-                        colorScheme="secondary"
-                      >
-                        Choose Digi-Reel
-                      </Button>
-                    )}
-                  </HStack>
-                )}
+            <VStack align="start" spacing={6} w="full">
+              <Box w="full">
+                <Text fontWeight="semibold" mb={1}>
+                  Enter Quantity
+                </Text>
+                <HStack spacing={4} alignItems="center" flexWrap="wrap">
+                  <Box flex="none">
+                    <OcQuantityInput
+                      controlId="dynamicQuantity"
+                      priceSchedule={{
+                        Name: "Dynamic", // Required dummy value
+                        PriceBreaks: unifiedBreaks,
+                      }}
+                      quantity={quantity}
+                      onChange={setQuantity}
+                    />
+                  </Box>
+
+                  {(effectiveProduct?.ID === ct?.ID ||
+                    effectiveProduct?.ID === dr?.ID) && (
+                    <>
+                      {ct && (
+                        <Button
+                          onClick={() => setSelectedVariantID(ct.ID!)}
+                          variant={
+                            selectedVariantID === ct.ID ? "solid" : "outline"
+                          }
+                          colorScheme="secondary"
+                        >
+                          Cut Tape
+                        </Button>
+                      )}
+                      {dr && (
+                        <Button
+                          onClick={() => setSelectedVariantID(dr.ID!)}
+                          variant={
+                            selectedVariantID === dr.ID ? "solid" : "outline"
+                          }
+                          colorScheme="secondary"
+                        >
+                          Digi-Reel®
+                        </Button>
+                      )}
+                    </>
+                  )}
+                </HStack>
+              </Box>
+
               {quantity > 0 && (
-                <Box w="full">
-                  <Heading size="sm" mb={2} fontWeight="semibold">
+                <Box bg="white" p={4} borderRadius="lg" boxShadow="sm" w="full">
+                  <Heading size="sm" mb={4} fontWeight="semibold">
                     Order Breakdown
                   </Heading>
                   <Table variant="simple" size="sm">
@@ -773,21 +783,24 @@ const ProductDetail: React.FC<ProductDetailProps> = ({
                   </Table>
                 </Box>
               )}
+
               {unitPrice !== null && (
-                <Text fontSize="4xl" fontWeight="semibold" color="gray.800">
-                  {/* Cost:{" "} */}
-                  <Text as="span" fontWeight="bold">
-                    {formatPrice(totalCost ?? undefined)}
+                <Box w="full" textAlign="right" pt={2}>
+                  <Text fontSize="4xl" fontWeight="semibold" color="gray.800">
+                    <Text as="span" fontWeight="bold">
+                      {formatPrice(totalCost ?? undefined)}
+                    </Text>
                   </Text>
-                </Text>
+                  <Button
+                    mt={4}
+                    colorScheme="primary"
+                    onClick={handleAddToCart}
+                    isDisabled={isAddToCartDisabled}
+                  >
+                    Add to Cart
+                  </Button>
+                </Box>
               )}
-              <Button
-                colorScheme="primary"
-                onClick={handleAddToCart}
-                isDisabled={isAddToCartDisabled}
-              >
-                Add to Cart
-              </Button>
             </VStack>
           )}
 
