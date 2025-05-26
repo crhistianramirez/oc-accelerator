@@ -59,7 +59,7 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
     { staleTime: 300000 }
   );
 
-  const categories = useMemo(() => categoryData?.Items ?? [], [categoryData]);
+  // const categories = useMemo(() => categoryData?.Items ?? [], [categoryData]);
 
   useEffect(() => {
     if (!selectedCatalog && catalogs?.length)
