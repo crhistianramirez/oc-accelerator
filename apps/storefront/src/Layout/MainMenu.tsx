@@ -20,7 +20,7 @@ import {
   useOrderCloudContext,
   useShopper,
 } from "@ordercloud/react-sdk";
-import { Catalog, Category } from "ordercloud-javascript-sdk";
+import { Catalog } from "ordercloud-javascript-sdk";
 import { FC, useEffect, useMemo, useState } from "react";
 import { TbShoppingCartFilled } from "react-icons/tb";
 import { Link as RouterLink } from "react-router-dom";
