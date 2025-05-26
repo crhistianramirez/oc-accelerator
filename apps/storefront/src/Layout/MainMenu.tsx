@@ -50,14 +50,14 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
 
   const catalogs = useMemo(() => catalogData?.Items ?? [], [catalogData]);
 
-  const activeCatalogId = catalogs.length > 0 ? catalogs[0]?.ID : undefined;
+  // const activeCatalogId = catalogs.length > 0 ? catalogs[0]?.ID : undefined;
 
-  const { data: categoryData } = useOcResourceList<Category>(
-    "Me.Categories",
-    activeCatalogId ? { catalogId: activeCatalogId } : undefined,
-    undefined,
-    { staleTime: 300000 }
-  );
+  // const { data: categoryData } = useOcResourceList<Category>(
+  //   "Me.Categories",
+  //   activeCatalogId ? { catalogId: activeCatalogId } : undefined,
+  //   undefined,
+  //   { staleTime: 300000 }
+  // );
 
   // const categories = useMemo(() => categoryData?.Items ?? [], [categoryData]);
 
