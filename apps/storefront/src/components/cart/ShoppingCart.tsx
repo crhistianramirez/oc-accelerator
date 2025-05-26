@@ -24,6 +24,7 @@ import { CartPaymentPanel } from "./cart-panels/CartPaymentPanel";
 import CartShippingPanel from "./cart-panels/CartShippingPanel";
 import CartSkeleton from "./ShoppingCartSkeleton";
 import CartSummary from "./ShoppingCartSummary";
+import { US_STATES } from "../../constants";
 
 export const TABS = {
   INFORMATION: 0,
@@ -55,6 +56,41 @@ export const ShoppingCart = (): JSX.Element => {
     Country: "US",
     Phone: "",
   });
+
+  function generateDemoAddress(validStates: string[]): Address {
+    const firstNames = ["Alice", "Bob", "Charlie", "Dana", "Elliot"];
+    const lastNames = ["Smith", "Johnson", "Brown", "Lee", "Garcia"];
+    const companies = [
+      "ACME Corp",
+      "Globex",
+      "Wayne Enterprises",
+      "Stark Industries",
+    ];
+    const streets = [
+      "123 Main St",
+      "456 Elm St",
+      "789 Maple Ave",
+      "321 Oak Dr",
+    ];
+    const cities = ["Minneapolis", "Chicago", "Austin", "Seattle", "Denver"];
+    const zips = ["55401", "60601", "73301", "98101", "80201"];
+
+    const randomState =
+      validStates[Math.floor(Math.random() * validStates.length)];
+
+    return {
+      FirstName: firstNames[Math.floor(Math.random() * firstNames.length)],
+      LastName: lastNames[Math.floor(Math.random() * lastNames.length)],
+      CompanyName: companies[Math.floor(Math.random() * companies.length)],
+      Street1: streets[Math.floor(Math.random() * streets.length)],
+      Street2: "",
+      City: cities[Math.floor(Math.random() * cities.length)],
+      State: randomState,
+      Zip: zips[Math.floor(Math.random() * zips.length)],
+      Country: "US",
+      Phone: "555-555-1234",
+    };
+  }
 
   const navigate = useNavigate();
   const toast = useToast();
@@ -172,13 +208,26 @@ export const ShoppingCart = (): JSX.Element => {
 
                       <TabPanels>
                         <TabPanel>
-                          <CartInformationPanel
-                            shippingAddress={shippingAddress}
-                            setShippingAddress={setShippingAddress}
-                            handleSaveShippingAddress={
-                              handleSaveShippingAddress
-                            }
-                          />
+                          <VStack align="flex-start" spacing={4}>
+                            <Button
+                              size="sm"
+                              colorScheme="blue"
+                              onClick={() =>
+                                setShippingAddress(
+                                  generateDemoAddress(US_STATES)
+                                )
+                              }
+                            >
+                              Demo Address
+                            </Button>
+                            <CartInformationPanel
+                              shippingAddress={shippingAddress}
+                              setShippingAddress={setShippingAddress}
+                              handleSaveShippingAddress={
+                                handleSaveShippingAddress
+                              }
+                            />
+                          </VStack>
                         </TabPanel>
                         <TabPanel>
                           <CartShippingPanel

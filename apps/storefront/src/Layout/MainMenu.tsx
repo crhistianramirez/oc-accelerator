@@ -146,7 +146,7 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
             )}
           </RouterLink>
           <HStack as="nav" flexGrow="1" ml={3}>
-            {categories.length > 0 && (
+            {/* {categories.length > 0 && (
               <Button
                 isActive={megaMenuDisclosure.isOpen}
                 size="sm"
@@ -156,7 +156,7 @@ const MainMenu: FC<MainMenuProps> = ({ loginDisclosure }) => {
               >
                 Categories
               </Button>
-            )}
+            )} */}
             {renderCatalogMenu()}
           </HStack>
           <HStack>
