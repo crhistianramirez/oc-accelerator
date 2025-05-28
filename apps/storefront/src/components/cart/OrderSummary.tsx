@@ -12,6 +12,7 @@ import React, { useCallback } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import OcCurrentOrderLineItemList from "./OcCurrentOrderLineItemList";
 import { useOrderCloudContext } from "@ordercloud/react-sdk";
+import formatPrice from "../../utils/formatPrice";
 
 interface OrderSummaryProps {
   order: RequiredDeep<Order>;
@@ -20,7 +21,7 @@ interface OrderSummaryProps {
 
 const OrderSummary: React.FC<OrderSummaryProps> = ({ order, lineItems }) => {
   const navigate = useNavigate();
-  const {isLoggedIn, newAnonSession} = useOrderCloudContext();
+  const { isLoggedIn, newAnonSession } = useOrderCloudContext();
 
   const handleLineItemChange = (newLi: LineItem) => {
     // Implement the logic to update the line item
@@ -34,7 +35,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ order, lineItems }) => {
       await newAnonSession();
       navigate("/products");
     }
-  }, [isLoggedIn, navigate, newAnonSession])
+  }, [isLoggedIn, navigate, newAnonSession]);
 
   return (
     <VStack align="stretch" spacing={6}>
@@ -77,11 +78,16 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ order, lineItems }) => {
           <Text>${order.PromotionDiscount}</Text>
         </Flex>
         <Flex justify="space-between">
+          <Text>Shipping</Text>
           <Text>
             {order.ShippingCost === 0
               ? "FREE SHIPPING"
               : "$" + order.ShippingCost}
           </Text>
+        </Flex>
+        <Flex justify="space-between">
+          <Text>Tax</Text>
+          <Text>{formatPrice(order.TaxCost)}</Text>
         </Flex>
         <Flex justify="space-between" fontWeight="bold" fontSize="lg">
           <Text>Total</Text>

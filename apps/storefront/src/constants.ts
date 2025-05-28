@@ -90,6 +90,7 @@ enum PAYMENT_PROVIDERS {
   PAYPAL,
   STRIPE,
   BLUESNAP,
+  FAKE_GATEWAY,
 }
 
 const PAYMENT_PROVIDER = import.meta.env

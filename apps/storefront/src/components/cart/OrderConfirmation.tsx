@@ -140,9 +140,9 @@ const OrderConfirmation = (): JSX.Element => {
               Shipping Method:{" "}
               {order.ShippingCost > 0 ? "Standard Shipping" : "Free Shipping"}
             </Text>
-            <Text>
+            {/* <Text>
               Payment Method: {order.xp?.PaymentMethod || "Not specified"}
-            </Text>
+            </Text> */}
           </VStack>
         </Container>
       </GridItem>

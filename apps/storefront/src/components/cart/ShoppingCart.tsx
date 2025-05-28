@@ -211,14 +211,14 @@ export const ShoppingCart = (): JSX.Element => {
                           <VStack align="flex-start" spacing={4}>
                             <Button
                               size="sm"
-                              colorScheme="blue"
+                              variant="outline"
                               onClick={() =>
                                 setShippingAddress(
                                   generateDemoAddress(US_STATES)
                                 )
                               }
                             >
-                              Demo Address
+                              Generate Demo Address
                             </Button>
                             <CartInformationPanel
                               shippingAddress={shippingAddress}
@@ -241,6 +241,8 @@ export const ShoppingCart = (): JSX.Element => {
                           <CartPaymentPanel
                             submitOrder={submitOrder}
                             submitting={submitting}
+                            orderID={orderWorksheet?.Order?.ID}
+                            orderTotal={orderWorksheet?.Order?.Total}
                           />
                         </TabPanel>
                       </TabPanels>
