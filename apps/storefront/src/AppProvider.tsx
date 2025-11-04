@@ -8,11 +8,13 @@ import {
   CLIENT_ID,
   CUSTOM_SCOPE,
   SCOPE,
-  IS_AUTO_APPLY
+  IS_AUTO_APPLY,
+  AGENT_IFRAME_ORIGIN
 } from "./constants";
 import { useToast } from "@chakra-ui/react";
 import { OrderCloudError } from "ordercloud-javascript-sdk";
 import GlobalLoadingIndicator from "./components/GlobalLoadingIndicator";
+import { IframeCommunicationProvider } from "./providers/IframeCommunicationProvider";
 
 const basename = import.meta.env.VITE_APP_CONFIG_BASE;
 
@@ -41,7 +43,9 @@ const AppProvider: FC = () => {
       autoApplyPromotions={IS_AUTO_APPLY}
       defaultErrorHandler={defaultErrorHandler}
     >
-      <RouterProvider router={router} />
+      <IframeCommunicationProvider iframeOrigin={AGENT_IFRAME_ORIGIN}>
+        <RouterProvider router={router} />
+      </IframeCommunicationProvider>
       <GlobalLoadingIndicator/>
     </OrderCloudProvider>
   );
