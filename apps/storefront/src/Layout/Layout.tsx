@@ -10,6 +10,7 @@ import { FC, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import MainMenu from "../Layout/MainMenu";
 import LoginModal from "../components/Login/LoginModal";
+import FloatingChat from "../Layout/FloatingChat";
 
 const Layout: FC = () => {
   const { pathname } = useLocation();
@@ -63,6 +64,8 @@ const Layout: FC = () => {
           </Text>
         </HStack>
       </VStack>
+
+      <FloatingChat />
     </>
   );
 };
